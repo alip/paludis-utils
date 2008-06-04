@@ -5,4 +5,6 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-04 Ali Polatel
 
-	(lots): Initial version
+	* setup.py: Added classifiers
+
+	* (lots): Initial version
