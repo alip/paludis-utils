@@ -67,7 +67,7 @@ setup(name = putils.__name__,
         url = "http://hawking.nonlogic.org/projects/paludis-utils",
         packages = [ "putils", "putils/applets" ],
         scripts = [ "scripts/" + VIRTUAL_APPLET, ],
-        cmdclass = { "install_scripts" : symlinking_install_scripts }
+        cmdclass = { "install_scripts" : symlinking_install_scripts },
         classifiers = [ "Development Status :: 3 - Alpha",
             "Environment :: Console",
             "Intended Audience :: End Users/Desktop",
