@@ -24,7 +24,7 @@ __name__ = "paludis-utils"
 __version__ = "0.1"
 __author__ = "Ali Polatel <polatel@itu.edu.tr>"
 __license__ = "GPL-2"
-__copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY." +\
+__copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
         __name__ + " is free software, " +\
         "and you are welcome to redistribute it under the terms of " +\
         "the GNU General Public License, version 2."
