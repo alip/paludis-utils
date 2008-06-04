@@ -68,4 +68,11 @@ setup(name = putils.__name__,
         packages = [ "putils", "putils/applets" ],
         scripts = [ "scripts/" + VIRTUAL_APPLET, ],
         cmdclass = { "install_scripts" : symlinking_install_scripts }
+        classifiers = [ "Development Status :: 3 - Alpha",
+            "Environment :: Console",
+            "Intended Audience :: End Users/Desktop",
+            "License :: OSI Approved :: GNU General Public License (GPL)",
+            "Programming Language :: Python",
+            "Topic :: System :: Systems Administration",
+            "Topic :: Utilities" ]
         )
