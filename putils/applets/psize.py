@@ -32,9 +32,9 @@ from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
 from putils.getopt import PaludisOptionParser
 from putils.packages import get_contents
 
-__all__ = [ "main", ]
+__all__ = [ "main", "usage" ]
 
-_applet_usage = """%prog [options] <pkgname>
+usage = """%prog [options] <pkgname>
 Calculate size of installed packages"""
 
 #{{{Globals
@@ -132,9 +132,7 @@ def parse_command_line(): #{{{
     """Parse command line options."""
 
     parser = PaludisOptionParser()
-
-    global _applet_usage
-    parser.usage = _applet_usage
+    parser.usage = usage
 
     og_size = OptionGroup(parser, "Displaying Size")
     og_size.add_option("-M","--megabytes", action = "store_const",

@@ -26,7 +26,9 @@ import re
 from putils.getopt import PaludisOptionParser
 from putils.packages import compare_atoms, split_cpv
 
-_applet_usage = """%prog [options] <pkgname>
+__all__ = [ "main", "usage" ]
+
+usage = """%prog [options] <pkgname>
 Split atom strings"""
 
 DEFAULT_MISSING_PART = "(null)"

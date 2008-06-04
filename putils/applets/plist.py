@@ -30,18 +30,16 @@ from paludis import (EnvironmentMaker, PackageIDCanonicalForm,
 from putils.getopt import PaludisOptionParser
 from putils.packages import get_contents
 
-__all__ = [ "main", ]
+__all__ = [ "main", "usage" ]
 
-_applet_usage = """%prog [options] <pkgname>
+usage = """%prog [options] <pkgname>
 List contents of packages matching requirements"""
 
 def parse_command_line(): #{{{
     """Parse command line options."""
 
     parser = PaludisOptionParser()
-
-    global _applet_usage
-    parser.usage = _applet_usage
+    parser.usage = usage
 
     # Listing Entries
     parser.add_default_content_limit_options()

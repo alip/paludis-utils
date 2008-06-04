@@ -5,6 +5,9 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-04 Ali Polatel
 
+	* putils/applets/patom.py, putils/applets/plist.py,
+	putils/applets/psize.py, scripts/p: s/_applet_usage/usage
+
 	* putils/applets/__init__.py, putils/packages.py,
 	+putils/applets/patom.py: Added new applet patom
 
