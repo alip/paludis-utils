@@ -20,6 +20,7 @@
 """Package related functions
 """
 
+import os
 import fnmatch
 import re
 
@@ -97,15 +98,16 @@ def get_contents(package, environment, only_directories = False, #{{{
         else:
             contents[pkg_id] = []
             for c in pkg_id.contents_key().value():
+                c_path = os.path.sep.join((environment.root, c.name))
                 if isinstance(c, requested_instance):
                     if fnpattern is not None:
                         if ignore_case:
-                            if not fnmatch.fnmatchcase(c.name, fnpattern):
+                            if not fnmatch.fnmatchcase(c_path, fnpattern):
                                 continue
                         else:
-                            if not fnmatch.fnmatch(c.name, fnpattern):
+                            if not fnmatch.fnmatch(c_path, fnpattern):
                                 continue
-                    if regexp is not None and pattern.match(c.name) is None:
+                    if regexp is not None and pattern.match(c_path) is None:
                         continue
                     contents[pkg_id].append(c)
     return contents

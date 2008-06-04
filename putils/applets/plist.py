@@ -46,6 +46,9 @@ def parse_command_line(): #{{{
 
     #{{{Format options
     option_group_format = OptionGroup(parser, "Formatting Options")
+    option_group_format.add_option("-r", "--root", action = "store_true",
+            dest = "root", default = False,
+            help = "Add ROOT as prefix to paths.")
     option_group_format.add_option("-t", "--target", action = "store_true",
             dest = "print_symlink_target", default = False,
             help = "Print targets for symlinks")
@@ -111,9 +114,16 @@ def main(): #{{{
         for package_id in contents:
             print "*", package_id.canonical_form(PackageIDCanonicalForm.FULL)
             for c in contents[package_id]:
-                print c.name,
+                if options.root:
+                    print os.path.sep.join((env.root, c.name)),
+                else:
+                    print c.name,
                 if options.print_symlink_target and hasattr(c, "target"):
-                    print "->", c.target
+                    print "->",
+                    if options.root:
+                        print os.path.sep.join((env.root, c.target))
+                    else:
+                        print c.target
                 else:
                     print
 #}}}

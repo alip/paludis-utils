@@ -52,7 +52,7 @@ _total_stats = { "devices" : 0,
 _total_size = 0
 #}}}
 
-def content_stat(contents, sum=False): #{{{
+def content_stat(contents, root, sum=False): #{{{
     """Return a statistics of contents."""
 
     stats = { "devices" : 0,
@@ -73,12 +73,13 @@ def content_stat(contents, sum=False): #{{{
             stats["fifos"] += 1
         elif isinstance(c, ContentsFileEntry):
             stats["files"] += 1
-            if os.path.exists(c.name):
-                size += os.path.getsize(c.name)
+            c_path = os.path.sep.join((root, c.name))
+            if os.path.exists(c_path):
+                size += os.path.getsize(c_path)
             else:
                 Log.instance.message("content.non_existant_file",
                         LogLevel.WARNING, LogContext.NO_CONTEXT,
-                        "File \"%s\" doesn't exit!" % c.name)
+                        "File \"%s\" doesn't exit!" % c_path)
         elif isinstance(c, ContentsMiscEntry):
             stats["misc"] += 1
         elif isinstance(c, ContentsSymEntry):
@@ -95,7 +96,7 @@ def content_stat(contents, sum=False): #{{{
     return size, stats
 #}}}
 
-def pprint_contents(contents, divisor=1024.0, sum=False, sum_only=False): #{{{
+def pprint_contents(contents, root, divisor=1024.0, sum=False, sum_only=False): #{{{
     """Pretty print package contents."""
 
     if contents is None:
@@ -103,7 +104,7 @@ def pprint_contents(contents, divisor=1024.0, sum=False, sum_only=False): #{{{
         global _total_stats, _total_size
         size, stats = _total_size, _total_stats
     else:
-        size, stats = content_stat(contents, sum)
+        size, stats = content_stat(contents, root, sum)
         if sum_only:
             return
 
@@ -183,12 +184,13 @@ def main(): #{{{
                 options.ignore_case)
         for package_id in contents:
             print package_id.canonical_form(PackageIDCanonicalForm.FULL),
-            pprint_contents(contents[package_id], options.display_size,
-                    options.sum, options.sum_only)
+            pprint_contents(contents[package_id], env.root,
+                    options.display_size, options.sum, options.sum_only)
 
     if options.sum or options.sum_only:
         print "Totals:",
-        pprint_contents(None, options.display_size, options.sum, options.sum_only)
+        pprint_contents(None, env.root, options.display_size, options.sum,
+                options.sum_only)
 #}}}
 
 if __name__ == '__main__':
