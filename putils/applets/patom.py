@@ -37,9 +37,7 @@ def parse_command_line(): #{{{
     """Parse command line options."""
 
     parser = PaludisOptionParser()
-
-    global _applet_usage
-    parser.usage = _applet_usage
+    parser.usage = usage
 
     # Remove -E and --log-level options which are useless for this applet.
     parser.remove_option("-E")
