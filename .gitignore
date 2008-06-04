@@ -1,0 +1,7 @@
+# gitignore for paludis-utils
+*~
+.*~
+.*swp
+#*#
+*.py[co]
+build

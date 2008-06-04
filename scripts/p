@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+#
+# Copyright (c) 2008 Ali Polatel <polatel@itu.edu.tr>
+#
+# This file is part of the paludis-utils. paludis-utils is free software; you
+# can redistribute it and/or modify it under the terms of the GNU General
+# Public License version 2, as published by the Free Software Foundation.
+#
+# paludis-utils is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+# Place, Suite 330, Boston, MA  02111-1307  USA
+
+"""paludis-utils -- Useful utilities for paludis
+"""
+
+import os
+import sys
+import getopt
+
+def get_applet(name):
+    """Get applet by name."""
+    try:
+        applet = __import__("putils.applets", globals(), locals(), [name])
+        applet = getattr(applet, name)
+    except (AttributeError, ImportError):
+        return None
+
+    return applet
+
+def usage():
+    """Print usage"""
+    print "Usage: p <applet> <args>"
+    print "Invoke a paludis-utils applet"
+    print
+    print "Currently defined applets:"
+
+    import putils.applets
+
+    print "p <applet> <args> : Virtual applet"
+    for applet_name in putils.applets.__all__:
+        applet = get_applet(applet_name)
+        print applet._applet_usage.replace("%prog", applet_name).replace("\n", " : ")
+
+def main():
+    if not os.path.islink(sys.argv[0]):
+        # Virtual applet, p
+        options, args = getopt.getopt(sys.argv[1:], "hV", ["help", "version"])
+        for o, a in options:
+            if o in ("-h", "--help"):
+                usage()
+                sys.exit(0)
+            elif o in ("-V", "--version"):
+                from putils.getopt import version
+                print version()
+                sys.exit(0)
+
+        if not args:
+            usage()
+            sys.exit(0)
+        else:
+            applet_name = args[0]
+            sys.argv = sys.argv[1:]
+    else:
+        applet_name = os.path.basename(sys.argv[0])
+
+    applet = get_applet(applet_name)
+    if applet is None:
+        print >>sys.stderr, "Usage error: No such applet", applet_name
+        print >>sys.stderr, "Try p --help"
+        sys.exit(1)
+
+    applet.main()
+
+if __name__ == '__main__':
+    main()
