@@ -39,7 +39,7 @@ def parse_command_line(): #{{{
     """Parse command line options."""
 
     parser = PaludisOptionParser()
-    parser.usage = usage
+    parser.usage = usage.replace("<pkgname>", "<pkgname>...")
 
     # Listing Entries
     parser.add_default_content_limit_options()

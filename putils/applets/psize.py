@@ -132,7 +132,7 @@ def parse_command_line(): #{{{
     """Parse command line options."""
 
     parser = PaludisOptionParser()
-    parser.usage = usage
+    parser.usage = usage.replace("<pkgname>", "<pkgname>...")
 
     og_size = OptionGroup(parser, "Displaying Size")
     og_size.add_option("-M","--megabytes", action = "store_const",
