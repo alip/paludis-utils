@@ -26,6 +26,10 @@ import re
 from putils.getopt import PaludisOptionParser
 from putils.packages import compare_atoms, split_cpv
 
+# Signal handling
+import signal
+from putils.common import exiting_signal_handler
+
 __all__ = [ "main", "usage" ]
 
 usage = """%prog [options] <pkgname>
@@ -65,6 +69,8 @@ def parse_command_line(): #{{{
     return options, args
 
 def main(): #{{{
+    signal.signal(signal.SIGINT, exiting_signal_handler)
+
     options, args = parse_command_line()
 
     if options.compare:
