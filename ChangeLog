@@ -5,6 +5,9 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-05 Ali Polatel
 
+	* putils/applets/plist.py, putils/applets/psize.py, putils/getopt.py,
+	putils/packages.py: Remove -w option, make it default
+
 	* putils/applets/plist.py, putils/applets/psize.py,
 	putils/packages.py: Added -R option to match by source repository.
 

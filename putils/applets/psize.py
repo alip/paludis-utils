@@ -190,8 +190,8 @@ def main(): #{{{
         contents = get_contents(package, env, options.source_repos,
                 options.only_directories, options.only_files, options.only_misc,
                 options.only_symlink, options.only_dev, options.only_fifo,
-                options.allow_wildcards, options.selection, options.fnpattern,
-                options.regexp, options.ignore_case)
+                options.selection, options.fnpattern, options.regexp,
+                options.ignore_case)
         for package_id in contents:
             print package_id.canonical_form(PackageIDCanonicalForm.FULL),
             pprint_contents(contents[package_id], env.root,

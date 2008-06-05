@@ -27,23 +27,16 @@ import re
 from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
         ContentsFileEntry, ContentsMiscEntry, ContentsSymEntry, Filter,
         Generator, Selection, VersionSpec, UserPackageDepSpecOption,
-        PackageNamePartError, parse_user_package_dep_spec)
+        QualifiedPackageNameError, parse_user_package_dep_spec)
 
 __all__ = [ "compare_atoms", "get_contents", "split_cpv" ]
 
-def get_contents(package, environment, source_repos = [],
-        only_directories = False, only_files = False, only_misc = False,
-        only_symlink = False, only_dev = False, only_fifo = False,
-        allow_wildcards = False, selection = "all-versions-grouped-by-slot",
-        fnpattern = None, regexp = None, ignore_case = False):
+def get_contents(package, env, source_repos = [], only_directories = False,
+        only_files = False, only_misc = False, only_symlink = False,
+        only_dev = False, only_fifo = False,
+        selection = "all-versions-grouped-by-slot", fnpattern = None,
+        regexp = None, ignore_case = False):
     """Get contents of package"""
-
-    #{{{Wildcards
-    if allow_wildcards:
-        parse_options = [UserPackageDepSpecOption.ALLOW_WILDCARDS]
-    else:
-        parse_options = []
-    #}}}
 
     #{{{Selection
     selection = "".join([x.capitalize() for x in selection.split("-")])
@@ -75,19 +68,24 @@ def get_contents(package, environment, source_repos = [],
             pattern = re.compile(regexp)
     #}}}
 
-    #{{{Get unique qpn
+    #{{{Get PackageDepSpec
+    filter_env = Filter.SupportsInstalledAction()
+    allow_wildcards = UserPackageDepSpecOption.ALLOW_WILDCARDS
     try:
-        qpn_obj = environment.package_database.fetch_unique_qualified_package_name(package)
-        qpn = str(qpn_obj.category) + "/" + str(qpn_obj.package)
-    except PackageNamePartError:
-        qpn = package
+        package_dep_spec = parse_user_package_dep_spec(package,
+                [allow_wildcards])
+    except QualifiedPackageNameError, e:
+        # Get a qualified package name
+        qpn = env.package_database.fetch_unique_qualified_package_name(
+                package, filter_env)
+        package = str(qpn.category) + "/" + str(qpn.package)
+        package_dep_spec = parse_user_package_dep_spec(package,
+                [allow_wildcards])
     #}}}
 
     #{{{Get CONTENTS
-    ids = environment[selection(
-        Generator.Matches(
-            parse_user_package_dep_spec(qpn, parse_options)) |
-        Filter.SupportsInstalledAction())]
+    ids = env[selection(Generator.Matches(package_dep_spec) |
+        filter_env)]
 
     contents = dict()
     for pkg_id in ids:
@@ -109,7 +107,7 @@ def get_contents(package, environment, source_repos = [],
             #}}}
             contents[pkg_id] = []
             for c in pkg_id.contents_key().value():
-                c_path = os.path.sep.join((environment.root, c.name))
+                c_path = os.path.sep.join((env.root, c.name))
                 if isinstance(c, requested_instance):
                     if fnpattern is not None:
                         if ignore_case:

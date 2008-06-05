@@ -135,9 +135,6 @@ best-version-in-each-slot, require-exactly-one, some-arbitrary-version
                         "require-exactly-one", "some-arbitrary-version" ],
                     action = "store", dest = "selection",
                     default = "all-versions-grouped-by-slot", help = help_selection )
-            option_group_query.add_option("-w", "--wildcard", action = "store_true",
-                    dest = "allow_wildcards", default = False,
-                    help = "Allow wildcards in package dep spec")
             self.add_option_group(option_group_query)
         self.__options_query = True
 
