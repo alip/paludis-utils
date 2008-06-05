@@ -31,9 +31,9 @@ from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
 
 __all__ = [ "compare_atoms", "get_contents", "split_cpv" ]
 
-def get_contents(package, environment, only_directories = False, #{{{
-        only_files = False, only_misc = False, only_symlink = False,
-        only_dev = False, only_fifo = False,
+def get_contents(package, environment, source_repos = [],
+        only_directories = False, only_files = False, only_misc = False,
+        only_symlink = False, only_dev = False, only_fifo = False,
         allow_wildcards = False, selection = "all-versions-grouped-by-slot",
         fnpattern = None, regexp = None, ignore_case = False):
     """Get contents of package"""
@@ -96,6 +96,17 @@ def get_contents(package, environment, only_directories = False, #{{{
                     LogContext.NO_CONTEXT,
                     "'%s' does not provide a contents key." % pkg_id.name)
         else:
+            #{{{Match by source repository
+            if source_repos:
+                if pkg_id.source_origin_key() is None:
+                    Log.instance.message("vdb.no_source_origin",
+                            LogLevel.WARNING, LogContext.NO_CONTEXT,
+                            "'%s' does not provide a source origin key." % pkg_id.name)
+                else:
+                    source_origin = pkg_id.source_origin_key()
+                    if source_origin.value() not in source_repos:
+                        continue
+            #}}}
             contents[pkg_id] = []
             for c in pkg_id.contents_key().value():
                 c_path = os.path.sep.join((environment.root, c.name))

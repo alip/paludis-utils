@@ -155,6 +155,16 @@ def parse_command_line(): #{{{
     parser.add_option_group(og_summary)
 
     parser.add_default_content_limit_options()
+
+    #{{{Matching by repository
+    option_group_repo = OptionGroup(parser, "Matching by repository")
+    option_group_repo.add_option("-R", "--repository", action = "append",
+            dest = "source_repos", default=list(), metavar="REPO",
+            help = """Match packages by source repository.
+This option can be passed more than once to match more repositories.""")
+    parser.add_option_group(option_group_repo)
+    #}}}
+
     parser.add_default_query_options()
     parser.add_default_advanced_query_options()
 
@@ -177,11 +187,11 @@ def main(): #{{{
         options.display_size = SIZE_KILOBYTES
 
     for package in args:
-        contents = get_contents(package, env, options.only_directories,
-                options.only_files, options.only_misc, options.only_symlink,
-                options.only_dev, options.only_fifo, options.allow_wildcards,
-                options.selection, options.fnpattern, options.regexp,
-                options.ignore_case)
+        contents = get_contents(package, env, options.source_repos,
+                options.only_directories, options.only_files, options.only_misc,
+                options.only_symlink, options.only_dev, options.only_fifo,
+                options.allow_wildcards, options.selection, options.fnpattern,
+                options.regexp, options.ignore_case)
         for package_id in contents:
             print package_id.canonical_form(PackageIDCanonicalForm.FULL),
             pprint_contents(contents[package_id], env.root,
