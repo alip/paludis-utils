@@ -39,7 +39,7 @@ def get_contents(package, env, source_repos = [], only_directories = False,
     """Get contents of package"""
 
     #{{{Selection
-    selection = "".join([x.capitalize() for x in selection.split("-")])
+    selection = "".join([x.capitalize() for x in selection.split("_")])
     selection = getattr(Selection, selection)
     #}}}
 

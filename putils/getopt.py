@@ -22,14 +22,17 @@
 
 import os
 import sys
-import optparse
 import re
 import textwrap
+from copy import copy
+from types import ListType, TupleType
+from optparse import (Option, OptionGroup, OptionParser, AmbiguousOptionError,
+        OptionError, OptionValueError)
 
 from paludis import (Log, LogLevel, LogContext, VERSION_MAJOR, VERSION_MINOR,
         VERSION_MICRO, VERSION_SUFFIX, SUBVERSION_REVISION)
 
-__all__ = [ "PaludisOptionParser", "version" ]
+__all__ = [ "PaludisOptionParser", "SmartOption", "version" ]
 
 # Don't seperate hyphenated words
 textwrap.TextWrapper.wordsep_re = re.compile(
@@ -56,7 +59,71 @@ def version():
 
     return version_str
 
-class PaludisOptionParser(optparse.OptionParser, object):
+def _regex_strip_name(regexp):
+    """Strip the name part of the regex (?P<.*>)"""
+
+    stripper = re.compile(r'(.*?)\(\?P<.*?>(.*)\)(.*)')
+    stripped_regexp = stripper.sub(r'\1\2\3', regexp)
+
+    return stripped_regexp
+
+def check_regex_choice(option, opt, value):
+    """Check regex_choice"""
+    for regexp in option.choices:
+        choice_re = re.compile(regexp, option.regex_flag)
+        m = choice_re.match(value)
+        if m is not None:
+            real_value = m.groupdict().keys()[0]
+            Log.instance.message("optparse.regex_choice.choosed",
+                    LogLevel.DEBUG, LogContext.NO_CONTEXT,
+                    "For option '%s' expanded '%s' to '%s'" % (opt, value, real_value))
+            return real_value
+
+    if (option.regex_flag & re.VERBOSE) == re.VERBOSE:
+        strip_space = lambda string: re.sub("\s", "", string)
+        option.choices = map(strip_space, option.choices)
+
+    choices = ",\n".join(
+            map(repr,
+                map(_regex_strip_name, option.choices)))
+
+    raise OptionValueError("""option %s: invalid choice: %r
+Choice must match one of the following regexps:
+%s""" % (opt, value, choices))
+
+class SmartOption(Option):
+    """Extend Option to add a new type regex_choice"""
+
+    TYPES = Option.TYPES + ("regex_choice",)
+    TYPE_CHECKER = copy(Option.TYPE_CHECKER)
+    TYPE_CHECKER["regex_choice"] = check_regex_choice
+
+    ATTRS = copy(Option.ATTRS)
+    ATTRS.append("regex_flag")
+
+    def _check_choice(self):
+        """Extended for regex_choice"""
+        if self.type and self.type.endswith("choice"):
+            if self.choices is None:
+                raise OptionError(
+                    "must supply a list of choices for type 'choice'", self)
+            elif type(self.choices) not in (TupleType, ListType):
+                raise OptionError(
+                    "choices must be a list of strings ('%s' supplied)"
+                    % str(type(self.choices)).split("'")[1], self)
+        elif self.choices is not None:
+            raise OptionError(
+                "must not supply choices for type %r" % self.type, self)
+
+    CHECK_METHODS = copy(Option.CHECK_METHODS)
+    for function in CHECK_METHODS:
+        if function.func_name == "_check_choice":
+            index = CHECK_METHODS.index(function)
+            CHECK_METHODS.remove(function)
+            CHECK_METHODS.insert(index, _check_choice)
+            break
+
+class PaludisOptionParser(OptionParser, object):
     """OptionParser specialized for Paludis."""
 
     __options_query = False
@@ -66,7 +133,7 @@ class PaludisOptionParser(optparse.OptionParser, object):
     def __init__(self,
                  usage=None,
                  option_list=None,
-                 option_class=optparse.Option,
+                 option_class=SmartOption,
                  version=None,
                  conflict_handler="error",
                  description=None,
@@ -122,17 +189,52 @@ class PaludisOptionParser(optparse.OptionParser, object):
         """Add default query options."""
 
         if not self.__options_query:
-            option_group_query = optparse.OptionGroup(self, title)
+            option_group_query = OptionGroup(self, title)
 
             help_selection = """Specify selection. One of:
 all-versions-grouped-by-slot, all-versions-sorted, all-versions-unsorted,
-best-version-in-each-slot, require-exactly-one, some-arbitrary-version
-    Default: %default"""
+best-version-in-each-slot, best-version-only, require-exactly-one, some-arbitrary-version
+                        Default: %default"""
 
-            option_group_query.add_option("-S", "--selection", type = "choice",
-                    choices = ["all-versions-grouped-by-slot", "all-versions-sorted",
-                        "all-versions-unsorted", "best-version-in-each-slot",
-                        "require-exactly-one", "some-arbitrary-version" ],
+            option_group_query.add_option("-S", "--selection", type = "regex_choice",
+                    choices = [
+"""^(?P<all_versions_unsorted>
+avu|
+(all-versions-u
+    (n(s(o(r(t(e(d)?)?)?)?)?)?)?
+))$
+""",
+"""^(?P<all_versions_sorted>
+avs|
+(all-versions-s(o(r(t(e(d)?)?)?)?)?
+))$
+""",
+"""^(?P<all_versions_grouped_by_slot>
+avgbs|
+(a(l(l(-(v(e(r(s(i(o(n(s(-(g(r(o(u(p(e(d(-(b(y(-(s(l(o(t)?
+    )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
+))$""",
+"""^(?P<best_version_in_each_slot>
+bvies|
+(b(e(s(t(-(v(e(r(s(i(o(n(-(i(n(-(e(a(c(h(-(s(l(o(t)?
+    )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
+))$""",
+"""^(?P<best_version_only>
+bvo|
+(best-version-o(n(l(y)?)?)?
+))$""",
+"""^(?P<require_exactly_one>
+reo|
+(r(e(q(u(i(r(e(-(e(x(a(c(t(l(y(-(o(n(e)?
+    )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
+))$""",
+"""^(?P<some_arbitrary_version>
+sav|
+(s(o(m(e(-(a(r(b(i(t(r(a(r(y(-(v(e(r(s(i(o(n)?
+    )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
+))$""" ],
+
+                    regex_flag = re.VERBOSE,
                     action = "store", dest = "selection",
                     default = "all-versions-grouped-by-slot", help = help_selection )
             self.add_option_group(option_group_query)
@@ -143,7 +245,7 @@ best-version-in-each-slot, require-exactly-one, some-arbitrary-version
         """Add default advanced query options."""
 
         if not self.__options_advanced_query:
-            option_group_aquery = optparse.OptionGroup(self, title)
+            option_group_aquery = OptionGroup(self, title)
 
             option_group_aquery.add_option("-e", "--regexp", dest = "regexp",
                     metavar = "PATTERN", help = "List files matching PATTERN")
@@ -161,7 +263,7 @@ best-version-in-each-slot, require-exactly-one, some-arbitrary-version
         """Add default limit options."""
 
         if not self.__options_content_limit:
-            option_group_climit = optparse.OptionGroup(self, title)
+            option_group_climit = OptionGroup(self, title)
 
             option_group_climit.add_option("-d", "--dir", action = "store_true",
                     dest = "only_directories", default = False,
