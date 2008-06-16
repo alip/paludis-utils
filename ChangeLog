@@ -3,6 +3,10 @@ ChangeLog for paludis-utils
 
 This file lists every change made except typo and formatting fixes.
 
+2008-06-16 Ali Polatel
+
+	* scripts/p: Check for error when importing applets.
+
 2008-06-08 Ali Polatel
 
 	* putils/getopt.py, putils/packages.py: Make -S/--selection smarter

@@ -46,6 +46,8 @@ def usage():
     print "p <applet> <args> : Virtual applet"
     for applet_name in putils.applets.__all__:
         applet = get_applet(applet_name)
+        if applet is None:
+            raise NameError("No such applet: '" + applet_name + "'")
         print applet.usage.replace("%prog", applet_name).replace("\n", " : ")
 
 def main():
