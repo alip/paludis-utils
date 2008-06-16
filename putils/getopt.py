@@ -29,8 +29,7 @@ from types import ListType, TupleType
 from optparse import (Option, OptionGroup, OptionParser, AmbiguousOptionError,
         OptionError, OptionValueError)
 
-from paludis import (Log, LogLevel, LogContext, VERSION_MAJOR, VERSION_MINOR,
-        VERSION_MICRO, VERSION_SUFFIX, SUBVERSION_REVISION)
+from paludis import Log, LogLevel, LogContext
 
 __all__ = [ "PaludisOptionParser", "SmartOption", "version" ]
 
@@ -43,16 +42,16 @@ textwrap.TextWrapper.wordsep_re = re.compile(
 def version():
     """Return version details"""
     from putils import __name__, __version__, __copyright__
-    from paludis import (VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO,
-            VERSION_SUFFIX, SUBVERSION_REVISION)
+    from paludis import (GIT_HEAD, VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO,
+            VERSION_SUFFIX)
 
     version_str = __name__ + " "  + __version__ + ", "
     version_str += "using paludis " + str(VERSION_MAJOR) + "." +\
             str(VERSION_MINOR) + "." + str(VERSION_MAJOR) +\
             VERSION_SUFFIX
 
-    if SUBVERSION_REVISION:
-        version_str += " r" + SUBVERSION_REVISION
+    if GIT_HEAD:
+        version_str += " head: " + GIT_HEAD
     version_str += "\n\n"
 
     version_str += "\n".join(textwrap.wrap(__copyright__))

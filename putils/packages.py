@@ -29,7 +29,7 @@ from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
         Generator, Selection, VersionSpec, UserPackageDepSpecOption,
         QualifiedPackageNameError, parse_user_package_dep_spec)
 
-__all__ = [ "compare_atoms", "get_contents", "split_cpv" ]
+__all__ = [ "compare_atoms", "get_contents", "split_atom" ]
 
 def get_contents(package, env, source_repos = [], only_directories = False,
         only_files = False, only_misc = False, only_symlink = False,
@@ -69,23 +69,15 @@ def get_contents(package, env, source_repos = [], only_directories = False,
     #}}}
 
     #{{{Get PackageDepSpec
-    filter_env = Filter.SupportsInstalledAction()
+    filter_installed = Filter.SupportsInstalledAction()
     allow_wildcards = UserPackageDepSpecOption.ALLOW_WILDCARDS
-    try:
-        package_dep_spec = parse_user_package_dep_spec(package,
-                [allow_wildcards])
-    except QualifiedPackageNameError, e:
-        # Get a qualified package name
-        qpn = env.package_database.fetch_unique_qualified_package_name(
-                package, filter_env)
-        package = str(qpn.category) + "/" + str(qpn.package)
-        package_dep_spec = parse_user_package_dep_spec(package,
-                [allow_wildcards])
+    package_dep_spec = parse_user_package_dep_spec(package, env,
+            [allow_wildcards], filter_installed)
     #}}}
 
     #{{{Get CONTENTS
     ids = env[selection(Generator.Matches(package_dep_spec) |
-        filter_env)]
+        filter_installed)]
 
     contents = dict()
     for pkg_id in ids:
@@ -123,27 +115,27 @@ def get_contents(package, env, source_repos = [], only_directories = False,
     #}}}
 #}}}
 
-def split_cpv(cpv): #{{{
-    """Split a package into category, package, version, revision."""
+def split_atom(atom, env): #{{{
+    """Split an atom into category, package, version, revision."""
 
     category = ""
     fake_category = "arnold-layne"
     cat_pn_sep = "/"
     version_re = re.compile("-\d")
 
-    if cat_pn_sep not in cpv:
+    if cat_pn_sep not in atom:
         # Make package name look like a qualified package name.
-        cpv = cat_pn_sep.join((fake_category, cpv))
+        atom = cat_pn_sep.join((fake_category, atom))
         category = None
-    if version_re.search(cpv) and not cpv.startswith("="):
+    if version_re.search(atom) and not atom.startswith("="):
         # Make package name look like an exact version
-        cpv = "=" + cpv
+        atom = "=" + atom
 
-    if cpv.endswith("/"):
-        category = re.sub("/+", "", cpv)
+    if atom.endswith("/"):
+        category = re.sub("/+", "", atom)
         return category, None, None, None
 
-    package_dep_spec = parse_user_package_dep_spec(cpv, [])
+    package_dep_spec = parse_user_package_dep_spec(atom, env, [])
     qpn = package_dep_spec.package
 
     if category is not None:
@@ -152,7 +144,7 @@ def split_cpv(cpv): #{{{
     package_name = str(qpn.package)
 
     # Split version and revision
-    if cpv.startswith("="):
+    if atom.startswith("="):
         cat_pkg = ""
         if category is not None:
             cat_pkg += category + cat_pn_sep
@@ -175,15 +167,15 @@ def split_cpv(cpv): #{{{
     return category, package_name, main_version, revision
 #}}}
 
-def compare_atoms(first_atom, second_atom): #{{{
+def compare_atoms(first_atom, second_atom, env): #{{{
     """Compare two atoms
 
     @return: None if atoms aren't equal, 0 if atoms are equal, 1 if the first
         atom is greater, -1 if the second atom is greater.
     """
 
-    category_1, name_1, version_1, revision_1 = split_cpv(first_atom)
-    category_2, name_2, version_2, revision_2 = split_cpv(second_atom)
+    category_1, name_1, version_1, revision_1 = split_atom(first_atom, env)
+    category_2, name_2, version_2, revision_2 = split_atom(second_atom, env)
 
     if category_1 != category_2 or name_1 != name_2:
         return None

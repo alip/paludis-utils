@@ -23,8 +23,10 @@
 import sys
 import re
 
+from paludis import EnvironmentMaker
+
 from putils.getopt import PaludisOptionParser
-from putils.packages import compare_atoms, split_cpv
+from putils.packages import compare_atoms, split_atom
 
 # Signal handling
 import signal
@@ -42,10 +44,6 @@ def parse_command_line(): #{{{
 
     parser = PaludisOptionParser()
     parser.usage = usage.replace("<pkgname>", "<pkgname>...")
-
-    # Remove -E and --log-level options which are useless for this applet.
-    parser.remove_option("-E")
-    parser.remove_option("--log-level")
 
     parser.add_option("-c", "--compare", action = "store_true",
             dest = "compare", default = False,
@@ -72,9 +70,10 @@ def main(): #{{{
     signal.signal(signal.SIGINT, exiting_signal_handler)
 
     options, args = parse_command_line()
+    env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     if options.compare:
-        ret = compare_atoms(args[0], args[1])
+        ret = compare_atoms(args[0], args[1], env)
         if ret is None:
             print args[0], "!=", args[1]
         elif ret == 0:
@@ -85,7 +84,7 @@ def main(): #{{{
             print args[0], "<", args[1]
     else:
         for package in args:
-            category, package_name, version, revision = split_cpv(package)
+            category, package_name, version, revision = split_atom(package, env)
             for part in (category, package_name, version, revision):
                 if part is not None:
                     print part,

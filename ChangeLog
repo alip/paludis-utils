@@ -7,6 +7,11 @@ This file lists every change made except typo and formatting fixes.
 
 	* scripts/p: Check for error when importing applets.
 
+	* putils/applets/patom.py, putils/getopt.py, putils/packages.py:
+	Updated for paludis head. Change parse_user_package_dep_spec usage.
+	Use GIT_HEAD instead of SUBVERSION_REVISION. Add -E option to patom
+	now that it's required by parse_user_package_dep_spec.
+
 2008-06-08 Ali Polatel
 
 	* putils/getopt.py, putils/packages.py: Make -S/--selection smarter
