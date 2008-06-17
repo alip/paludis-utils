@@ -31,33 +31,15 @@ from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
 
 __all__ = [ "compare_atoms", "get_contents", "split_atom" ]
 
-def get_contents(package, env, source_repos = [], only_directories = False,
-        only_files = False, only_misc = False, only_symlink = False,
-        only_dev = False, only_fifo = False,
-        selection = "all-versions-grouped-by-slot", fnpattern = None,
-        regexp = None, ignore_case = False):
+def get_contents(package, env, source_repos = [],
+        requested_instances = [object],
+        selection = Selection.AllVersionsGroupedBySlot,
+        fnpattern = None, regexp = None, ignore_case = False):
     """Get contents of package"""
 
     #{{{Selection
     selection = "".join([x.capitalize() for x in selection.split("_")])
     selection = getattr(Selection, selection)
-    #}}}
-
-    #{{{Requested Instance
-    if only_dev:
-        requested_instance = ContentsDevEntry
-    elif only_directories:
-        requested_instance = ContentsDirEntry
-    elif only_fifo:
-        requested_instance = ContentsFifoEntry
-    elif only_files:
-        requested_instance = ContentsFileEntry
-    elif only_misc:
-        requested_instance = ContentsMiscEntry
-    elif only_symlink:
-        requested_instance = ContentsSymEntry
-    else:
-        requested_instance = object
     #}}}
 
     #{{{Pattern matching
@@ -100,7 +82,7 @@ def get_contents(package, env, source_repos = [], only_directories = False,
             contents[pkg_id] = []
             for c in pkg_id.contents_key().value():
                 c_path = os.path.sep.join((env.root, c.name))
-                if isinstance(c, requested_instance):
+                if True in [isinstance(c, i) for i in requested_instances]:
                     if fnpattern is not None:
                         if ignore_case:
                             if not fnmatch.fnmatchcase(c_path, fnpattern):

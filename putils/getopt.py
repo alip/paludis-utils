@@ -182,6 +182,29 @@ class PaludisOptionParser(OptionParser, object):
                         LogLevel.WARNING, LogContext.NO_CONTEXT,
                         "Option --ignore-case is only valid with --regexp and/or --fnmatch options")
 
+        # Requested instances
+        if self.__options_content_limit:
+            from paludis import (ContentsDevEntry, ContentsDirEntry,
+                    ContentsFileEntry, ContentsFifoEntry, ContentsMiscEntry,
+                    ContentsSymEntry)
+
+            ri = []
+            if options.list_Dev:
+                ri.append(ContentsDevEntry)
+            if options.list_Dir:
+                ri.append(ContentsDirEntry)
+            if options.list_Fifo:
+                ri.append(ContentsFifoEntry)
+            if options.list_File:
+                ri.append(ContentsFileEntry)
+            if options.list_Misc:
+                ri.append(ContentsMiscEntry)
+            if options.list_Sym:
+                ri.append(ContentsSymEntry)
+            if not ri:
+                ri.append(object)
+            options.requested_instances = ri
+
         return (options, args)
 
     def add_default_query_options(self, title="Query Options"):
@@ -265,23 +288,23 @@ sav|
             option_group_climit = OptionGroup(self, title)
 
             option_group_climit.add_option("-d", "--dir", action = "store_true",
-                    dest = "only_directories", default = False,
-                    help = "Only directories")
+                    dest = "list_Dir", default = False,
+                    help = "List directories")
             option_group_climit.add_option("-f", "--file", action = "store_true",
-                    dest = "only_files", default = False,
-                    help = "Only files")
+                    dest = "list_File", default = False,
+                    help = "List files")
             option_group_climit.add_option("-m", "--misc", action = "store_true",
-                    dest = "only_misc", default = False,
-                    help = "Only misc entries")
+                    dest = "list_Misc", default = False,
+                    help = "List misc entries")
             option_group_climit.add_option("-s", "--symlink", action = "store_true",
-                    dest = "only_symlink", default = False,
-                    help = "Only symlinks")
+                    dest = "list_Sym", default = False,
+                    help = "List symlinks")
             option_group_climit.add_option("-D", "--device", action = "store_true",
-                    dest = "only_dev", default = False,
-                    help = "Only devices")
+                    dest = "list_Dev", default = False,
+                    help = "List devices")
             option_group_climit.add_option("-F", "--fifo", action = "store_true",
-                    dest = "only_fifo", default = False,
-                    help = "Only fifos")
+                    dest = "list_Fifo", default = False,
+                    help = "List fifos")
             self.add_option_group(option_group_climit)
         self.__options_content_limit = True
 

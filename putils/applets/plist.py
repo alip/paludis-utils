@@ -81,34 +81,6 @@ This option can be passed more than once to match more repositories.""")
         print >>sys.stderr, "Usage error: No package specified"
         print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
         sys.exit(1)
-
-    # Check for conflicting options
-    may_conflict_options = {
-            '--dir'     : options.only_directories,
-            '--file'    : options.only_files,
-            '--misc'    : options.only_misc,
-            '--symlink' : options.only_symlink,
-            '--device'  : options.only_dev,
-            '--fifo'    : options.only_fifo }
-    only_options_true = 0
-    conflicting_options = []
-
-    for opt in may_conflict_options:
-        if may_conflict_options[opt]:
-            conflicting_options.append(opt)
-            only_options_true += 1
-
-    if only_options_true > 1:
-        print >>sys.stderr, "Usage error: Conflicting options:",
-        print >>sys.stderr, ", ".join(conflicting_options)
-        print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
-        sys.exit(1)
-
-    if (conflicting_options and not '--symlink' in conflicting_options and
-            options.print_symlink_target):
-            Log.instance.message("cmdline.option_not_valid", LogLevel.WARNING,
-                    LogContext.NO_CONTEXT,
-                    "Option --target is only valid when listing symlinks")
     #}}}
 
     return (options, args)
@@ -122,10 +94,8 @@ def main(): #{{{
 
     for package in args:
         contents = get_contents(package, env, options.source_repos,
-                options.only_directories, options.only_files, options.only_misc,
-                options.only_symlink, options.only_dev, options.only_fifo,
-                options.selection, options.fnpattern, options.regexp,
-                options.ignore_case)
+                options.requested_instances, options.selection,
+                options.fnpattern, options.regexp, options.ignore_case)
         for package_id in contents:
             print "*", package_id.canonical_form(PackageIDCanonicalForm.FULL)
             for c in contents[package_id]:
