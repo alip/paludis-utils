@@ -29,7 +29,7 @@ from types import ListType, TupleType
 from optparse import (Option, OptionGroup, OptionParser, AmbiguousOptionError,
         OptionError, OptionValueError)
 
-from paludis import Log, LogLevel, LogContext
+from paludis import Log, LogLevel, LogContext, Selection
 
 __all__ = [ "PaludisOptionParser", "SmartOption", "version" ]
 
@@ -174,6 +174,10 @@ class PaludisOptionParser(OptionParser, object):
             Log.instance.log_level = getattr(LogLevel,
                     options.log_level.upper())
 
+        # Selection
+        if self.__options_query:
+            options.selection = getattr(Selection, options.selection)
+
         # Check conflicting options
         if self.__options_advanced_query:
             if (options.ignore_case and options.regexp is None and
@@ -220,37 +224,37 @@ best-version-in-each-slot, best-version-only, require-exactly-one, some-arbitrar
 
             option_group_query.add_option("-S", "--selection", type = "regex_choice",
                     choices = [
-"""^(?P<all_versions_unsorted>
+"""^(?P<AllVersionsUnsorted>
 avu|
 (all-versions-u
     (n(s(o(r(t(e(d)?)?)?)?)?)?)?
 ))$
 """,
-"""^(?P<all_versions_sorted>
+"""^(?P<AllVersionsSorted>
 avs|
 (all-versions-s(o(r(t(e(d)?)?)?)?)?
 ))$
 """,
-"""^(?P<all_versions_grouped_by_slot>
+"""^(?P<AllVersionsGroupedBySlot>
 avgbs|
 (a(l(l(-(v(e(r(s(i(o(n(s(-(g(r(o(u(p(e(d(-(b(y(-(s(l(o(t)?
     )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
 ))$""",
-"""^(?P<best_version_in_each_slot>
+"""^(?P<BestVersionInEachSlot>
 bvies|
 (b(e(s(t(-(v(e(r(s(i(o(n(-(i(n(-(e(a(c(h(-(s(l(o(t)?
     )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
 ))$""",
-"""^(?P<best_version_only>
+"""^(?P<BestVersionOnly>
 bvo|
 (best-version-o(n(l(y)?)?)?
 ))$""",
-"""^(?P<require_exactly_one>
+"""^(?P<RequireExactlyOne>
 reo|
 (r(e(q(u(i(r(e(-(e(x(a(c(t(l(y(-(o(n(e)?
     )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
 ))$""",
-"""^(?P<some_arbitrary_version>
+"""^(?P<SomeArbitraryVersion>
 sav|
 (s(o(m(e(-(a(r(b(i(t(r(a(r(y(-(v(e(r(s(i(o(n)?
     )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?

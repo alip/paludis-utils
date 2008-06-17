@@ -24,10 +24,9 @@ import os
 import fnmatch
 import re
 
-from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
-        ContentsFileEntry, ContentsMiscEntry, ContentsSymEntry, Filter,
-        Generator, Selection, VersionSpec, UserPackageDepSpecOption,
-        QualifiedPackageNameError, parse_user_package_dep_spec)
+from paludis import (Filter, Generator, Selection, VersionSpec,
+        UserPackageDepSpecOption, QualifiedPackageNameError,
+        parse_user_package_dep_spec)
 
 __all__ = [ "compare_atoms", "get_contents", "split_atom" ]
 
@@ -36,11 +35,6 @@ def get_contents(package, env, source_repos = [],
         selection = Selection.AllVersionsGroupedBySlot,
         fnpattern = None, regexp = None, ignore_case = False):
     """Get contents of package"""
-
-    #{{{Selection
-    selection = "".join([x.capitalize() for x in selection.split("_")])
-    selection = getattr(Selection, selection)
-    #}}}
 
     #{{{Pattern matching
     if regexp is not None:
