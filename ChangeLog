@@ -3,6 +3,12 @@ ChangeLog for paludis-utils
 
 This file lists every change made except typo and formatting fixes.
 
+2008-06-18 Ali Polatel
+
+	* putils/applets/patom.py, putils/applets/plist.py,
+	putils/applets/psize.py, scripts/p: Moved signal handling to virtual
+	applet.
+
 2008-06-17 Ali Polatel
 
 	* putils/getopt.py, putils/packages.py: Fixed -S/--selection.

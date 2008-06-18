@@ -30,10 +30,6 @@ from paludis import (EnvironmentMaker, PackageIDCanonicalForm,
 from putils.getopt import PaludisOptionParser
 from putils.packages import get_contents
 
-# Signal handling
-import signal
-from putils.common import exiting_signal_handler
-
 __all__ = [ "main", "usage" ]
 
 usage = """%prog [options] <pkgname>
@@ -87,8 +83,6 @@ This option can be passed more than once to match more repositories.""")
 #}}}
 
 def main(): #{{{
-    signal.signal(signal.SIGINT, exiting_signal_handler)
-
     options, args = parse_command_line()
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 

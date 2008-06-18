@@ -24,6 +24,10 @@ import os
 import sys
 import getopt
 
+# Signal handling
+import signal
+from putils.common import exiting_signal_handler
+
 def get_applet(name):
     """Get applet by name."""
     try:
@@ -51,6 +55,8 @@ def usage():
         print applet.usage.replace("%prog", applet_name).replace("\n", " : ")
 
 def main():
+    signal.signal(signal.SIGINT, exiting_signal_handler)
+
     if not os.path.islink(sys.argv[0]):
         # Virtual applet, p
         options, args = getopt.getopt(sys.argv[1:], "hV", ["help", "version"])
