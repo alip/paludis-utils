@@ -51,7 +51,7 @@ def version():
             VERSION_SUFFIX
 
     if GIT_HEAD:
-        version_str += " head: " + GIT_HEAD
+        version_str += GIT_HEAD
     version_str += "\n\n"
 
     version_str += "\n".join(textwrap.wrap(__copyright__))
