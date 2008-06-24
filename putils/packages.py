@@ -20,12 +20,14 @@
 """Package related functions
 """
 
+from __future__ import generators
+
 import os
 import fnmatch
 import re
 
-from paludis import (Filter, Generator, Selection, VersionSpec,
-        UserPackageDepSpecOption, QualifiedPackageNameError,
+from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
+        VersionSpec, UserPackageDepSpecOption, QualifiedPackageNameError,
         parse_user_package_dep_spec)
 
 __all__ = [ "compare_atoms", "get_contents", "split_atom" ]
@@ -55,39 +57,40 @@ def get_contents(package, env, source_repos = [],
     ids = env[selection(Generator.Matches(package_dep_spec) |
         filter_installed)]
 
-    contents = dict()
-    for pkg_id in ids:
-        if pkg_id.contents_key() is None:
+    for package_id in ids:
+        if package_id.contents_key() is None:
             Log.instance.message("vdb.no_contents", LogLevel.WARNING,
                     LogContext.NO_CONTEXT,
-                    "'%s' does not provide a contents key." % pkg_id.name)
+                    "'%s' does not provide a contents key." % package_id.name)
         else:
             #{{{Match by source repository
             if source_repos:
-                if pkg_id.source_origin_key() is None:
+                if package_id.source_origin_key() is None:
                     Log.instance.message("vdb.no_source_origin",
                             LogLevel.WARNING, LogContext.NO_CONTEXT,
-                            "'%s' does not provide a source origin key." % pkg_id.name)
+                            "'%s' does not provide a source origin key." % package_id.name)
                 else:
-                    source_origin = pkg_id.source_origin_key()
+                    source_origin = package_id.source_origin_key()
                     if source_origin.value() not in source_repos:
                         continue
             #}}}
-            contents[pkg_id] = []
-            for c in pkg_id.contents_key().value():
-                c_path = os.path.sep.join((env.root, c.name))
-                if True in [isinstance(c, i) for i in requested_instances]:
+
+            requested_contents = list()
+            for content in package_id.contents_key().value():
+                content_path = os.path.sep.join((env.root, content.name))
+                if True in [isinstance(content, i) for i in requested_instances]:
                     if fnpattern is not None:
                         if ignore_case:
-                            if not fnmatch.fnmatchcase(c_path, fnpattern):
+                            if not fnmatch.fnmatchcase(content_path, fnpattern):
                                 continue
                         else:
-                            if not fnmatch.fnmatch(c_path, fnpattern):
+                            if not fnmatch.fnmatch(content_path, fnpattern):
                                 continue
-                    if regexp is not None and pattern.match(c_path) is None:
+                    if regexp is not None and pattern.match(content_path) is None:
                         continue
-                    contents[pkg_id].append(c)
-    return contents
+                    requested_contents.append(content)
+
+            yield package_id, requested_contents
     #}}}
 #}}}
 

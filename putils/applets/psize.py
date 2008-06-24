@@ -187,13 +187,14 @@ def main(): #{{{
         options.display_size = SIZE_KILOBYTES
 
     for package in args:
-        contents = get_contents(package, env, options.source_repos,
+        content_generator = get_contents(package, env, options.source_repos,
                 options.requested_instances, options.selection,
                 options.fnpattern, options.regexp, options.ignore_case)
-        for package_id in contents:
+
+        for package_id, contents in content_generator:
             print package_id.canonical_form(PackageIDCanonicalForm.FULL),
-            pprint_contents(contents[package_id], env.root,
-                    options.display_size, options.sum, options.sum_only)
+            pprint_contents(contents, env.root, options.display_size,
+                    options.sum, options.sum_only)
 
     if options.sum or options.sum_only:
         print "Totals:",

@@ -87,22 +87,23 @@ def main(): #{{{
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     for package in args:
-        contents = get_contents(package, env, options.source_repos,
+        content_generator = get_contents(package, env, options.source_repos,
                 options.requested_instances, options.selection,
                 options.fnpattern, options.regexp, options.ignore_case)
-        for package_id in contents:
+
+        for package_id, contents in content_generator:
             print "*", package_id.canonical_form(PackageIDCanonicalForm.FULL)
-            for c in contents[package_id]:
+            for content in contents:
                 if options.root:
-                    print os.path.sep.join((env.root, c.name)),
+                    print os.path.sep.join((env.root, content.name)),
                 else:
-                    print c.name,
-                if options.print_symlink_target and hasattr(c, "target"):
+                    print content.name,
+                if options.print_symlink_target and hasattr(content, "target"):
                     print "->",
                     if options.root:
-                        print os.path.sep.join((env.root, c.target))
+                        print os.path.sep.join((env.root, content.target))
                     else:
-                        print c.target
+                        print content.target
                 else:
                     print
 #}}}
