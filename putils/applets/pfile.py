@@ -36,6 +36,8 @@ def parse_command_line(): #{{{
     parser = PaludisOptionParser()
     parser.usage = usage.replace("<filename>", "<filename>...")
 
+    parser.add_default_content_limit_options()
+
     options, args = parser.parse_args()
 
     return options, args
@@ -46,7 +48,8 @@ def main(): #{{{
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     for filename in args:
-        content_generator = search_contents(filename, env)
+        content_generator = search_contents(filename, env,
+                options.requested_instances)
 
         for package_id, content in content_generator:
             print package_id, "(" + content.name + ")"

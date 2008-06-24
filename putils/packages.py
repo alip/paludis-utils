@@ -105,7 +105,7 @@ def get_contents(package, env, source_repos = [],
     #}}}
 #}}}
 
-def search_contents(path, env, match_exact=False): #{{{
+def search_contents(path, env, requested_instances=[object], match_exact=False): #{{{
     """Search filename in contents of installed packages."""
 
     # Get package ids of all installed packages
@@ -120,6 +120,10 @@ def search_contents(path, env, match_exact=False): #{{{
                     "'%s' does not provide a contents key." % package_id.name)
         else:
             for content in package_id.contents_key().value():
+                if not True in [isinstance(content, i) for i in
+                        requested_instances]:
+                    continue
+
                 content_path = abspath(content.name, env.root)
 
                 if match_exact and path == content_path:

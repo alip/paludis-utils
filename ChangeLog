@@ -5,6 +5,9 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-24 Ali Polatel
 
+	* putils/applets/pfile.py, putils/packages.py: Add content limiting
+	options to pfile
+
 	* putils/packages.py: Make content check earlier.
 
 	* putils/packages.py: Smarter ROOT handling
