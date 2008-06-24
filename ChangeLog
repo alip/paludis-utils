@@ -5,8 +5,10 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-24 Ali Polatel
 
-	* +applets/pfile.py, applets/__init__.py, packages.py: Added new
-	applet pfile
+	* putils/packages.py: Smarter ROOT handling
+	
+	* +putils/applets/pfile.py, putils/applets/__init__.py,
+	putils/packages.py: Added new applet pfile
 
 	* putils/applets/plist.py, putils/applets/psize.py,
 	putils/packages.py: Use generators

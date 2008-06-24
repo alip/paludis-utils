@@ -30,7 +30,15 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
         VersionSpec, UserPackageDepSpecOption, QualifiedPackageNameError,
         parse_user_package_dep_spec)
 
-__all__ = [ "compare_atoms", "get_contents", "search_contents", "split_atom" ]
+__all__ = [ "abspath", "compare_atoms", "get_contents", "search_contents", "split_atom" ]
+
+def abspath(path, root):
+    """If root is / then return path,
+    else return root + / + path."""
+    if root == os.path.sep:
+        return path
+    else:
+        return os.path.sep.join((root, path))
 
 def get_contents(package, env, source_repos = [],
         requested_instances = [object],
@@ -77,7 +85,7 @@ def get_contents(package, env, source_repos = [],
 
             requested_contents = list()
             for content in package_id.contents_key().value():
-                content_path = os.path.sep.join((env.root, content.name))
+                content_path = abspath(content.name, env.root)
                 if True in [isinstance(content, i) for i in requested_instances]:
                     if fnpattern is not None:
                         if ignore_case:
@@ -109,10 +117,7 @@ def search_contents(path, env, match_exact=False): #{{{
                     "'%s' does not provide a contents key." % package_id.name)
         else:
             for content in package_id.contents_key().value():
-                if env.root != os.path.sep:
-                    content_path = os.path.sep.join((env.root, content.name))
-                else:
-                    content_path = content.name
+                content_path = abspath(content.name, env.root)
 
                 if match_exact and path == content_path:
                     yield package_id, content
