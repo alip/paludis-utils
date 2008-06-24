@@ -94,6 +94,32 @@ def get_contents(package, env, source_repos = [],
     #}}}
 #}}}
 
+def search_contents(path, env, match_exact=False): #{{{
+    """Search filename in contents of installed packages."""
+
+    # Get package ids of all installed packages
+    ids = env[Selection.AllVersionsGroupedBySlot(
+        Generator.Matches.All() | Filter.SupportsInstalledAction()
+        )]
+
+    for package_id in ids:
+        if package_id.contents_key() is None:
+            Log.instance.message("vdb.no_contents", LogLevel.WARNING,
+                    LogContext.NO_CONTEXT,
+                    "'%s' does not provide a contents key." % package_id.name)
+        else:
+            for content in package_id.contents_key().value():
+                if env.root != os.path.sep:
+                    content_path = os.path.sep.join((env.root, content.name))
+                else:
+                    content_path = content.name
+
+                if match_exact and path == content_path:
+                    yield package_id, content
+                elif path in content_path:
+                    yield package_id, content
+#}}}
+
 def split_atom(atom, env): #{{{
     """Split an atom into category, package, version, revision."""
 

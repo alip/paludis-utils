@@ -20,4 +20,4 @@
 """Applets for paludis-utils
 """
 
-__all__ = [ "patom", "plist", "psize" ]
+__all__ = [ "patom", "pfile", "plist", "psize" ]
