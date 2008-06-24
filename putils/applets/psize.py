@@ -168,7 +168,7 @@ This option can be passed more than once to match more repositories.""")
     parser.add_default_query_options()
     parser.add_default_advanced_query_options()
 
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
 
     # Check if any positional arguments are specified
     if not args:
@@ -176,7 +176,7 @@ This option can be passed more than once to match more repositories.""")
         print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
         sys.exit(1)
 
-    return (options, args)
+    return options, args
 #}}}
 
 def main(): #{{{

@@ -165,7 +165,7 @@ class PaludisOptionParser(OptionParser, object):
             "can be set for default command-line options."))
 
     def parse_args(self, args=None, values=None):
-        (options, args) = super(PaludisOptionParser, self).parse_args(args, values)
+        options, args = super(PaludisOptionParser, self).parse_args(args, values)
 
         Log.instance.program_name = self.get_prog_name()
 

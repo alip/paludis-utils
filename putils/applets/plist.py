@@ -69,7 +69,7 @@ This option can be passed more than once to match more repositories.""")
     parser.add_default_advanced_query_options()
     #}}}
 
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
 
     #{{{Sanity Check
     # Check if any positional arguments are specified
@@ -79,7 +79,7 @@ This option can be passed more than once to match more repositories.""")
         sys.exit(1)
     #}}}
 
-    return (options, args)
+    return options, args
 #}}}
 
 def main(): #{{{
