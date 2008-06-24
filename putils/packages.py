@@ -30,7 +30,7 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
         VersionSpec, UserPackageDepSpecOption, QualifiedPackageNameError,
         parse_user_package_dep_spec)
 
-__all__ = [ "compare_atoms", "get_contents", "split_atom" ]
+__all__ = [ "compare_atoms", "get_contents", "search_contents", "split_atom" ]
 
 def get_contents(package, env, source_repos = [],
         requested_instances = [object],
