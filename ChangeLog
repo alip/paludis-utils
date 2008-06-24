@@ -5,6 +5,8 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-24 Ali Polatel
 
+	* putils/packages.py: Make content check earlier.
+
 	* putils/packages.py: Smarter ROOT handling
 	
 	* +putils/applets/pfile.py, putils/applets/__init__.py,

@@ -85,18 +85,21 @@ def get_contents(package, env, source_repos = [],
 
             requested_contents = list()
             for content in package_id.contents_key().value():
+                if not True in [isinstance(content, i) for i in
+                        requested_instances]:
+                    continue
+
                 content_path = abspath(content.name, env.root)
-                if True in [isinstance(content, i) for i in requested_instances]:
-                    if fnpattern is not None:
-                        if ignore_case:
-                            if not fnmatch.fnmatchcase(content_path, fnpattern):
-                                continue
-                        else:
-                            if not fnmatch.fnmatch(content_path, fnpattern):
-                                continue
-                    if regexp is not None and pattern.match(content_path) is None:
-                        continue
-                    requested_contents.append(content)
+                if fnpattern is not None:
+                    if ignore_case:
+                        if not fnmatch.fnmatchcase(content_path, fnpattern):
+                            continue
+                    else:
+                        if not fnmatch.fnmatch(content_path, fnpattern):
+                            continue
+                if regexp is not None and pattern.match(content_path) is None:
+                    continue
+                requested_contents.append(content)
 
             yield package_id, requested_contents
     #}}}
