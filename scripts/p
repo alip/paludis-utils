@@ -40,7 +40,7 @@ def get_applet(name):
 
     return applet
 
-def arrange_separator(string, sep=" : "):
+def arrange_separator(string, sep=":"):
     """Arrange separators so they appear below each other."""
     lines = string.splitlines()
 
