@@ -20,6 +20,8 @@
 """paludis-utils -- Useful utilities for paludis
 """
 
+from __future__ import generators
+
 import os
 import sys
 import getopt
@@ -38,6 +40,21 @@ def get_applet(name):
 
     return applet
 
+def arrange_separator(string, sep=" : "):
+    """Arrange separators so they appear below each other."""
+    lines = string.splitlines()
+
+    max_index = 0
+    for line in lines:
+        if line.index(sep) > max_index:
+            max_index = line.index(sep)
+
+    for line in lines:
+        if line.index(sep) != max_index:
+            yield line.replace(sep, " " * (max_index - line.index(sep)) + sep)
+        else:
+            yield line
+
 def usage():
     """Print usage"""
     print "Usage: p <applet> <args>"
@@ -47,12 +64,15 @@ def usage():
 
     import putils.applets
 
-    print "p <applet> <args> : Virtual applet"
+    applet_usage = "p <applet> <args> : Virtual applet\n"
     for applet_name in putils.applets.__all__:
         applet = get_applet(applet_name)
         if applet is None:
             raise NameError("No such applet: '" + applet_name + "'")
-        print applet.usage.replace("%prog", applet_name).replace("\n", " : ")
+        applet_usage += applet.usage.replace("%prog", applet_name).replace("\n", " : ")
+        applet_usage += "\n"
+
+    print "\n".join(arrange_separator(applet_usage))
 
 def main():
     signal.signal(signal.SIGINT, exiting_signal_handler)
