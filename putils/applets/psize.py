@@ -166,7 +166,6 @@ This option can be passed more than once to match more repositories.""")
     #}}}
 
     parser.add_default_query_options()
-    parser.add_default_advanced_query_options()
 
     options, args = parser.parse_args()
 

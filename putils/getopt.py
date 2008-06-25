@@ -126,7 +126,6 @@ class PaludisOptionParser(OptionParser, object):
     """OptionParser specialized for Paludis."""
 
     __options_query = False
-    __options_advanced_query = False
     __options_content_limit = False
 
     def __init__(self,
@@ -178,8 +177,7 @@ class PaludisOptionParser(OptionParser, object):
         if self.__options_query:
             options.selection = getattr(Selection, options.selection)
 
-        # Check conflicting options
-        if self.__options_advanced_query:
+            # Check conflicting options
             if (options.ignore_case and options.regexp is None and
                     options.fnpattern is None):
                 Log.instance.message("cmdline.option_not_valid",
@@ -263,26 +261,16 @@ sav|
                     regex_flag = re.VERBOSE,
                     action = "store", dest = "selection",
                     default = "all-versions-grouped-by-slot", help = help_selection )
-            self.add_option_group(option_group_query)
-        self.__options_query = True
-
-    def add_default_advanced_query_options(self,
-        title="Advanced Query Options"):
-        """Add default advanced query options."""
-
-        if not self.__options_advanced_query:
-            option_group_aquery = OptionGroup(self, title)
-
-            option_group_aquery.add_option("-e", "--regexp", dest = "regexp",
+            option_group_query.add_option("-e", "--regexp", dest = "regexp",
                     metavar = "PATTERN", help = "List files matching PATTERN")
-            option_group_aquery.add_option("-n", "--fnmatch", dest = "fnpattern",
+            option_group_query.add_option("-n", "--fnmatch", dest = "fnpattern",
                     metavar = "PATTERN",
                     help = "List files matching PATTERN using Unix shell-style wildcards")
-            option_group_aquery.add_option("-i", "--ignore-case", action = "store_true",
+            option_group_query.add_option("-i", "--ignore-case", action = "store_true",
                     dest = "ignore_case", help = "Ignore case distinctions in PATTERN")
-            self.add_option_group(option_group_aquery)
 
-        self.__options_advanced_query = True
+            self.add_option_group(option_group_query)
+        self.__options_query = True
 
     def add_default_content_limit_options(self,
             title="Limiting by type of content"):

@@ -64,10 +64,8 @@ This option can be passed more than once to match more repositories.""")
     parser.add_option_group(option_group_repo)
     #}}}
 
-    #{{{Add default query options
+    # Add default query options
     parser.add_default_query_options()
-    parser.add_default_advanced_query_options()
-    #}}}
 
     options, args = parser.parse_args()
 
