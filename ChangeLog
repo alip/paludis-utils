@@ -3,6 +3,10 @@ ChangeLog for paludis-utils
 
 This file lists every change made except typo and formatting fixes.
 
+2008-06-27 Ali Polatel
+
+	* putils/lscolours.py: s/grab_colours/parse_ls_colours
+
 2008-06-26 Ali Polatel
 
 	* putils/lscolours.py: Call os.stat() once for each file.

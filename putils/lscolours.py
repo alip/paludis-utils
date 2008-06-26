@@ -75,7 +75,7 @@ special_keys = {
 special_keys_sorted = ( "tw", "ow", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
-def grab_colours():
+def parse_ls_colours():
     """Convert LS_COLORS into two dictionaries,
     One has wildcards and associated colour codes,
     the other has special codes and associated colour codes,"""
@@ -103,7 +103,7 @@ def colourify_file(filename): #{{{
     """Colourify filename as ls would using LS_COLORS."""
     global _colour_codes_cache, _colour_special_codes_cache
     if _colour_codes_cache is None and _colour_special_codes_cache is None:
-        codes, special_codes = grab_colours()
+        codes, special_codes = parse_ls_colours()
 
         if not codes and not special_codes:
             return filename
