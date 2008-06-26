@@ -38,6 +38,10 @@ def parse_command_line(): #{{{
     parser = PaludisOptionParser()
     parser.usage = usage.replace("<filename>", "<filename>...")
 
+    parser.add_option("-C", "--no-colour", action = "store_false",
+            dest = "colour", default = True,
+            help = "Don't output colour")
+
     parser.add_default_content_limit_options()
 
     option_group_query = OptionGroup(parser, "Query Options")
@@ -61,12 +65,17 @@ def main(): #{{{
     options, args = parse_command_line()
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
+    if options.colour:
+        from putils.lscolours import colourify_file
+    else:
+        colourify_file = lambda f: f
+
     for filename in args:
         content_generator = search_contents(filename, env, options.matcher,
-                options.ignore_case, + options.requested_instances)
+                options.ignore_case, options.requested_instances)
 
         for package_id, content in content_generator:
-            print package_id, "(" + content.name + ")"
+            print package_id, colourify_file(content.name)
 #}}}
 
 if __name__ == '__main__':
