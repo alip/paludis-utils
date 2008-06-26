@@ -53,6 +53,9 @@ def parse_command_line(): #{{{
             dest = "print_symlink_target", default = False,
             help = "Print targets for symlinks")
     parser.add_option_group(option_group_format)
+    option_group_format.add_option("-C", "--no-colour", action = "store_false",
+            dest = "colour", default = True,
+            help = "Don't output colour")
     #}}}
 
     #{{{Matching by repository
@@ -84,24 +87,45 @@ def main(): #{{{
     options, args = parse_command_line()
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
+    if options.colour:
+        from putils.lscolours import colourify_file
+    else:
+        colourify_file = lambda f: f
+
     for package in args:
         content_generator = get_contents(package, env, options.source_repos,
                 options.requested_instances, options.selection,
                 options.fnpattern, options.regexp, options.ignore_case)
 
         for package_id, contents in content_generator:
-            print "*", package_id.canonical_form(PackageIDCanonicalForm.FULL)
+            if options.colour:
+                print "\033[1;35m*\033[0m",
+            else:
+                print "*",
+            print package_id.canonical_form(PackageIDCanonicalForm.FULL)
             for content in contents:
                 if options.root:
-                    print os.path.sep.join((env.root, content.name)),
+                    print colourify_file(
+                            os.path.sep.join((env.root, content.name))
+                            ),
                 else:
-                    print content.name,
+                    print colourify_file(content.name),
+
                 if options.print_symlink_target and hasattr(content, "target"):
                     print "->",
-                    if options.root:
-                        print os.path.sep.join((env.root, content.target))
+                    if os.path.isabs(content.target):
+                        if options.root:
+                            print colourify_file(
+                                    os.path.sep.join((env.root, content.target))
+                                    )
+                        else:
+                            print colourify_file(content.target)
                     else:
-                        print content.target
+                        abstarget = os.path.sep.join(
+                                (os.path.dirname(content.name), content.target)
+                                )
+                        print colourify_file(abstarget).replace(
+                                os.path.dirname(content.name) + os.path.sep, '')
                 else:
                     print
 #}}}
