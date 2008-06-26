@@ -142,7 +142,11 @@ def colourify_file(filename): #{{{
 
     try:
         mode = os.stat(filename)[0]
-    except OSError:
+    except OSError, e:
+        if e.errno == 2: # File doesn't exist
+            missing = True
+        elif e.errno == 13: # Not allowed to stat()
+            missing = False
         mode = False
 
     if mode:
@@ -157,9 +161,12 @@ def colourify_file(filename): #{{{
         for key in special_keys_sorted:
             if special_keys[key](filename, mode):
                 return "\033[" + special_codes[key] + "m" + filename + "\033[m"
-    else:
+    elif missing:
         # File is missing -- "mi"
         return "\033[" + special_codes["mi"] + "m" + filename + "\033[m"
+    else:
+        # Permission denied
+        return "\033[7m" + filename + "\033[m"
 
     return filename
 #}}}
