@@ -53,6 +53,11 @@ def parse_command_line(): #{{{
             dest = "print_symlink_target", default = False,
             help = "Print targets for symlinks")
     parser.add_option_group(option_group_format)
+    option_group_format.add_option("", "--canonical-form", type = "choice",
+            choices = [ "full", "version", "no_version" ],
+            default = "full", dest = "canonical", metavar="FORM",
+            help = """The canonical form to print package ids.
+One of: full, version, no_version. Default: %default""")
     option_group_format.add_option("-C", "--no-colour", action = "store_false",
             dest = "colour", default = True,
             help = "Don't output colour")
@@ -92,6 +97,8 @@ def main(): #{{{
     else:
         colourify_file = lambda f: f
 
+    canonical_form = getattr(PackageIDCanonicalForm, options.canonical.upper())
+
     for package in args:
         content_generator = get_contents(package, env, options.source_repos,
                 options.requested_instances, options.selection,
@@ -102,7 +109,7 @@ def main(): #{{{
                 print "\033[1;35m*\033[0m",
             else:
                 print "*",
-            print package_id.canonical_form(PackageIDCanonicalForm.FULL)
+            print package_id.canonical_form(canonical_form)
             for content in contents:
                 if options.root:
                     print colourify_file(
