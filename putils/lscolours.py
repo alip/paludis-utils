@@ -28,46 +28,47 @@ from stat import *
 __all__ = [ "colourify_file" ]
 
 # Special keys in LS_COLORS
+# The lambda functions are only called if the file exists!
 special_keys = {
         # Normal
-        "no" : lambda f: os.path.exists(f),
+        "no" : lambda f, mode: True,
         # File
-        "fi" : lambda f: os.path.isfile(f),
+        "fi" : lambda f, mode: S_ISREG(mode),
         # Directory
-        "di" : lambda f: os.path.isdir(f),
+        "di" : lambda f, mode: S_ISDIR(mode),
         # Symbolic link
-        "ln" : lambda f: os.path.islink(f),
+        "ln" : lambda f, mode: os.path.islink(f),
         # Fifo
-        "pi" : lambda f: os.path.exists(f) and S_ISFIFO(os.stat(f)[0]),
+        "pi" : lambda f, mode: S_ISFIFO(mode),
         # Socket
-        "so" : lambda f: os.path.exists(f) and S_ISSOCK(os.stat(f)[0]),
+        "so" : lambda f, mode: S_ISSOCK(mode),
         # Door FIXME
-        "do" : lambda f: False,
+        "do" : lambda f, mode: False,
         # Block device driver
-        "bd" : lambda f: os.path.exists(f) and S_ISBLK(os.stat(f)[0]),
+        "bd" : lambda f, mode: S_ISBLK(mode),
         # Character device driver
-        "cd" : lambda f: os.path.exists(f) and S_ISCHR(os.stat(f)[0]),
+        "cd" : lambda f, mode: S_ISCHR(mode),
         # Orphaned symlinks
-        "or" : lambda f: (os.path.islink(f) and
+        "or" : lambda f, mode: (os.path.islink(f) and
                             not os.path.exists(os.path.realpath(f))),
         # Missing files
-        "mi" : lambda f: not os.path.exists(f),
+        "mi" : lambda f, mode: False,
         # File that is setuid (u+s)
-        "su" : lambda f: (os.path.isfile(f) and
-                            S_IMODE(os.stat(f)[0]) & 04000),
+        "su" : lambda f, mode: (S_ISREG(mode) and
+                            S_IMODE(mode) & 04000),
         # File that is setgid (g+s)
-        "sg" : lambda f: (os.path.isfile(f) and
-                            S_IMODE(os.stat(f)[0]) & 02000),
+        "sg" : lambda f, mode: (S_ISREG(mode) and
+                            S_IMODE(mode) & 02000),
         # Dir that is sticky and other-writable (+t,o+w)
-        "tw" : lambda f: (os.path.isdir(f) and
-                            S_IMODE(os.stat(f)[0]) & 01000 and
-                            S_IMODE(os.stat(f)[0]) & 0002 ),
+        "tw" : lambda f, mode: (S_ISDIR(mode) and
+                            S_IMODE(mode) & 01000 and
+                            S_IMODE(mode) & 0002 ),
         # Dir that is other-writable (o+w) and not sticky
-        "ow" : lambda f: (os.path.isdir(f) and
-                            S_IMODE(os.stat(f)[0]) & 0002 and
-                            S_IMODE(os.stat(f)[0]) & 01000 == 0),
+        "ow" : lambda f, mode: (S_ISDIR(mode) and
+                            S_IMODE(mode) & 0002 and
+                            S_IMODE(mode) & 01000 == 0),
         # Executable
-        "ex" : lambda f: os.path.isfile(f) and os.access(f, os.X_OK),
+        "ex" : lambda f, mode: S_ISREG(mode) and os.access(f, os.X_OK),
 }
 # The order in which we should check them,
 # From most specific to least specific
@@ -113,14 +114,22 @@ def colourify_file(filename): #{{{
         codes = _colour_codes_cache
         special_codes = _colour_special_codes_cache
 
-    if os.path.exists(filename):
+    try:
+        mode = os.stat(filename)[0]
+    except OSError:
+        mode = False
+
+    if mode:
         for key in codes:
             if fnmatch.fnmatch(filename, key):
                 return "\033[" + codes[key] + "m" + filename + "\033[m"
 
-    for key in special_keys_sorted:
-        if special_keys[key](filename):
-            return "\033[" + special_codes[key] + "m" + filename + "\033[m"
+        for key in special_keys_sorted:
+            if special_keys[key](filename, mode):
+                return "\033[" + special_codes[key] + "m" + filename + "\033[m"
+    else:
+        # File is missing -- "mi"
+        return "\033[" + special_codes["mi"] + "m" + filename + "\033[m"
 
     return filename
 #}}}
