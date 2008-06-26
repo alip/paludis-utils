@@ -67,12 +67,16 @@ special_keys = {
         "ow" : lambda f, mode: (S_ISDIR(mode) and
                             S_IMODE(mode) & 0002 and
                             S_IMODE(mode) & 01000 == 0),
+        # Dir that is sticky and not other-writable
+        "st" : lambda f, mode: (S_ISDIR(mode) and
+                            S_IMODE(mode) & 01000 and
+                            S_IMODE(mode) & 0002 == 0),
         # Executable
         "ex" : lambda f, mode: S_ISREG(mode) and os.access(f, os.X_OK),
 }
 # The order in which we should check them,
 # From most specific to least specific
-special_keys_sorted = ( "tw", "ow", "su", "sg", "or", "ln", "pi", "so", "do",
+special_keys_sorted = ( "tw", "ow", "st", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
 def parse_ls_colours():
@@ -83,7 +87,8 @@ def parse_ls_colours():
     if not "LS_COLORS" in os.environ:
         return None, None
 
-    codes = special_codes = dict()
+    codes = dict()
+    special_codes = dict()
     for equation in os.environ["LS_COLORS"].split(":"):
         if not "=" in equation:
             continue
