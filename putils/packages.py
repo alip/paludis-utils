@@ -32,6 +32,14 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
 
 __all__ = [ "abspath", "compare_atoms", "get_contents", "search_contents", "split_atom" ]
 
+PMS_VERSION = re.compile("""
+    (?P<main_version>
+        (?P<bare_version>\d+(\.\d+)*)
+        (?P<letter>[a-z])?
+        (?P<suffix>_alpha|_beta|_pre|_rc|_p(\d+)?)?
+    )
+    (-(?P<revision>r\d+))?""", re.VERBOSE)
+
 def abspath(path, root):
     """If root is / then return path,
     else return root + / + path."""
@@ -154,16 +162,17 @@ def search_contents(path, env, matcher="simple", ignore_case=False, #{{{
 def split_atom(atom, env): #{{{
     """Split an atom into category, package, version, revision."""
 
+    global PMS_VERSION
+
     category = ""
     fake_category = "arnold-layne"
     cat_pn_sep = "/"
-    version_re = re.compile("-\d")
 
     if cat_pn_sep not in atom:
         # Make package name look like a qualified package name.
         atom = cat_pn_sep.join((fake_category, atom))
         category = None
-    if version_re.search(atom) and not atom.startswith("="):
+    if PMS_VERSION.search(atom) and not atom.startswith("="):
         # Make package name look like an exact version
         atom = "=" + atom
 
@@ -181,20 +190,14 @@ def split_atom(atom, env): #{{{
 
     # Split version and revision
     if atom.startswith("="):
-        cat_pkg = ""
-        if category is not None:
-            cat_pkg += category + cat_pn_sep
-        else:
-            cat_pkg += fake_category + cat_pn_sep
+        version = PMS_VERSION.search(package_dep_spec.text)
 
-        cat_pkg += package_name
-        cat_pkg_re = re.compile(r"=?%s-" % cat_pkg)
-
-        version = cat_pkg_re.sub("", package_dep_spec.text)
-        if version:
-            version_spec = VersionSpec(version)
-            revision = version_spec.revision_only()
-            main_version = re.sub("-%s$" % revision, "", version)
+        if version is not None:
+            main_version = version.group("main_version")
+            if version.group("revision"):
+                revision = version.group("revision")
+            else:
+                revision = "r0"
         else:
             main_version = revision = None
     else:
