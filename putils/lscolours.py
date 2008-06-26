@@ -110,7 +110,7 @@ def translate(wildcards): #{{{
 
     for wildcard in wildcards:
         regex += "(" + fnmatch.translate(wildcard) + ")"
-        if not len(wildcards) - wildcards.index(wildcard) == 1:
+        if len(wildcards) - wildcards.index(wildcard) != 1:
             regex += "|"
 
     regex += ")"
