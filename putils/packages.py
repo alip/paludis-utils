@@ -138,7 +138,9 @@ def search_contents(path, env, matcher="simple", ignore_case=False, #{{{
 
                 content_path = abspath(content.name, env.root)
 
-                if matcher == "exact" and path == content_path:
+                if (matcher == "exact" and
+                        (path == content_path or
+                            path == os.path.basename(content_path))):
                     yield package_id, content
                 elif matcher == "simple" and path in content_path:
                     yield package_id, content
