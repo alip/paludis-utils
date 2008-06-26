@@ -20,6 +20,8 @@
 """List packages owning files
 """
 
+from optparse import OptionGroup
+
 from paludis import EnvironmentMaker
 
 from putils.getopt import PaludisOptionParser
@@ -38,6 +40,18 @@ def parse_command_line(): #{{{
 
     parser.add_default_content_limit_options()
 
+    option_group_query = OptionGroup(parser, "Query Options")
+    option_group_query.add_option("-M", "--matcher", dest = "matcher",
+            type = "choice", default = "simple", metavar="ALG",
+            choices = [ "regex", "fnmatch", "simple", "exact" ],
+            help = """Which match algorithm to use.
+One of regex, fnmatch, simple, exact. Default: %default""")
+    option_group_query.add_option("-i", "--ignore-case", action = "store_true",
+            dest = "ignore_case",
+            help = "Ignore case distinctions for matchers regex and fnmatch")
+
+    parser.add_option_group(option_group_query)
+
     options, args = parser.parse_args()
 
     return options, args
@@ -48,8 +62,8 @@ def main(): #{{{
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     for filename in args:
-        content_generator = search_contents(filename, env,
-                options.requested_instances)
+        content_generator = search_contents(filename, env, options.matcher,
+                options.ignore_case, + options.requested_instances)
 
         for package_id, content in content_generator:
             print package_id, "(" + content.name + ")"

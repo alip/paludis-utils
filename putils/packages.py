@@ -105,13 +105,25 @@ def get_contents(package, env, source_repos = [],
     #}}}
 #}}}
 
-def search_contents(path, env, requested_instances=[object], match_exact=False): #{{{
+def search_contents(path, env, matcher="simple", ignore_case=False, #{{{
+        requested_instances=[object]):
     """Search filename in contents of installed packages."""
 
     # Get package ids of all installed packages
     ids = env[Selection.AllVersionsGroupedBySlot(
         Generator.Matches.All() | Filter.SupportsInstalledAction()
         )]
+
+    if matcher == "fnmatch":
+        if ignore_case:
+            fnmatch_matcher = fnmatch.fnmatchcase
+        else:
+            fnmatch_matcher = fnmatch.fnmatch
+    elif matcher == "regex":
+        if ignore_case:
+            regex_matcher = re.compile(path, re.IGNORECASE)
+        else:
+            regex_matcher = re.compile(path)
 
     for package_id in ids:
         if package_id.contents_key() is None:
@@ -126,9 +138,14 @@ def search_contents(path, env, requested_instances=[object], match_exact=False):
 
                 content_path = abspath(content.name, env.root)
 
-                if match_exact and path == content_path:
+                if matcher == "exact" and path == content_path:
                     yield package_id, content
-                elif path in content_path:
+                elif matcher == "simple" and path in content_path:
+                    yield package_id, content
+                elif (matcher == "fnmatch" and
+                        fnmatch_matcher(content_path, path)):
+                    yield package_id, content
+                elif matcher == "regex" and regex_matcher.search(content_path):
                     yield package_id, content
 #}}}
 
