@@ -74,26 +74,49 @@ special_keys = {
 special_keys_sorted = ( "tw", "ow", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
-def colourify_file(filename): #{{{
-    """Colourify filename as ls would using LS_COLORS."""
+def grab_colours():
+    """Convert LS_COLORS into two dictionaries,
+    One has wildcards and associated colour codes,
+    the other has special codes and associated colour codes,"""
+
     if not "LS_COLORS" in os.environ:
-        return filename
+        return None, None
 
-    colours = os.environ["LS_COLORS"].split(":")
-    special_codes = dict()
-
-    for code in colours:
-        if not "=" in code:
+    codes = special_codes = dict()
+    for equation in os.environ["LS_COLORS"].split(":"):
+        if not "=" in equation:
             continue
 
-        key, colour_code = code.split("=")
+        key, colour_code = equation.split("=")
 
-        if not key in special_keys:
-            if os.path.exists(filename) and fnmatch.fnmatch(filename, key):
-                return "\033[" + colour_code + "m" + filename + "\033[m"
-        else:
+        if key in special_keys_sorted:
             special_codes[key] = colour_code
+        else:
+            codes[key] = colour_code
 
+    return codes, special_codes
+
+_colour_codes_cache = None
+_colour_special_codes_cache = None
+def colourify_file(filename): #{{{
+    """Colourify filename as ls would using LS_COLORS."""
+    global _colour_codes_cache, _colour_special_codes_cache
+    if _colour_codes_cache is None and _colour_special_codes_cache is None:
+        codes, special_codes = grab_colours()
+
+        if not codes and not special_codes:
+            return filename
+
+        _colour_codes_cache = codes
+        _colour_special_codes_cache = special_codes
+    else:
+        codes = _colour_codes_cache
+        special_codes = _colour_special_codes_cache
+
+    if os.path.exists(filename):
+        for key in codes:
+            if fnmatch.fnmatch(filename, key):
+                return "\033[" + codes[key] + "m" + filename + "\033[m"
 
     for key in special_keys_sorted:
         if special_keys[key](filename):

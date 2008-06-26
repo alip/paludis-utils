@@ -5,6 +5,9 @@ This file lists every change made except typo and formatting fixes.
 
 2008-06-26 Ali Polatel
 
+	* putils/lscolours.py: Cache LS_COLORS output to make colourizing
+	faster.
+
 	* +putils/lscolours.py, putils/__init__.py, putils/applets/plist.py:
 	Add coloured output for plist using LS_COLORS environment variable.
 
