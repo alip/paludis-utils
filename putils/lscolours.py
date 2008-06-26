@@ -22,6 +22,7 @@
 
 import os
 import fnmatch
+import re
 
 from stat import *
 
@@ -79,7 +80,7 @@ special_keys = {
 special_keys_sorted = ( "tw", "ow", "st", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
-def parse_ls_colours():
+def parse_ls_colours(): #{{{
     """Convert LS_COLORS into two dictionaries,
     One has wildcards and associated colour codes,
     the other has special codes and associated colour codes,"""
@@ -101,23 +102,43 @@ def parse_ls_colours():
             codes[key] = colour_code
 
     return codes, special_codes
+#}}}
+
+def translate(wildcards): #{{{
+    """Translate a group of wildcards into a simple regex."""
+    regex = "("
+
+    for wildcard in wildcards:
+        regex += "(" + fnmatch.translate(wildcard) + ")"
+        if not len(wildcards) - wildcards.index(wildcard) == 1:
+            regex += "|"
+
+    regex += ")"
+
+    return regex
+#}}}
 
 _colour_codes_cache = None
 _colour_special_codes_cache = None
+_wildcard_regex = None
 def colourify_file(filename): #{{{
     """Colourify filename as ls would using LS_COLORS."""
-    global _colour_codes_cache, _colour_special_codes_cache
+    global _colour_codes_cache, _colour_special_codes_cache, _wildcard_regex
     if _colour_codes_cache is None and _colour_special_codes_cache is None:
         codes, special_codes = parse_ls_colours()
 
         if not codes and not special_codes:
             return filename
 
+        wildcard_regex = re.compile(translate(codes.keys()))
+
         _colour_codes_cache = codes
         _colour_special_codes_cache = special_codes
+        _wildcard_regex = wildcard_regex
     else:
         codes = _colour_codes_cache
         special_codes = _colour_special_codes_cache
+        wildcard_regex = _wildcard_regex
 
     try:
         mode = os.stat(filename)[0]
@@ -125,9 +146,13 @@ def colourify_file(filename): #{{{
         mode = False
 
     if mode:
-        for key in codes:
-            if fnmatch.fnmatch(filename, key):
-                return "\033[" + codes[key] + "m" + filename + "\033[m"
+        match = wildcard_regex.match(filename)
+        if match is not None:
+            # The first matched group is the parent, skip it.
+            key_index = list(match.groups()[1:]).index(filename)
+            key = codes.keys()[key_index]
+
+            return "\033[" + codes[key] + "m" + filename + "\033[m"
 
         for key in special_keys_sorted:
             if special_keys[key](filename, mode):
