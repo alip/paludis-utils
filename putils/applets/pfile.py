@@ -20,6 +20,7 @@
 """List packages owning files
 """
 
+import sys
 from optparse import OptionGroup
 
 from paludis import EnvironmentMaker
@@ -57,6 +58,12 @@ One of regex, fnmatch, simple, exact. Default: %default""")
     parser.add_option_group(option_group_query)
 
     options, args = parser.parse_args()
+
+    # Check if any positional arguments are specified
+    if not args:
+        print >>sys.stderr, "Usage error: No package specified"
+        print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
+        sys.exit(1)
 
     return options, args
 #}}}
