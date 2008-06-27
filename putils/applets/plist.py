@@ -93,7 +93,7 @@ def main(): #{{{
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     if options.colour:
-        from putils.lscolours import colourify_file
+        from putils.colours import colourify_file
     else:
         colourify_file = lambda f: f
 

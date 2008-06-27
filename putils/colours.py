@@ -26,6 +26,8 @@ import re
 
 from stat import *
 
+from putils.common import cache_return
+
 __all__ = [ "colourify_file" ]
 
 # Special keys in LS_COLORS
@@ -80,6 +82,7 @@ special_keys = {
 special_keys_sorted = ( "tw", "ow", "st", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
+@cache_return
 def parse_ls_colours(): #{{{
     """Convert LS_COLORS into two dictionaries,
     One has wildcards and associated colour codes,
@@ -104,41 +107,31 @@ def parse_ls_colours(): #{{{
     return codes, special_codes
 #}}}
 
-def translate(wildcards): #{{{
-    """Translate a group of wildcards into a simple regex."""
+@cache_return
+def translate(wildcards, flags=0): #{{{
+    """Translate a group of wildcards into a compiled regex"""
     regex = "("
 
+    index = 0
+    last_index = len(wildcards) - 1
     for wildcard in wildcards:
         regex += "(" + fnmatch.translate(wildcard) + ")"
-        if len(wildcards) - wildcards.index(wildcard) != 1:
+        if last_index != index:
             regex += "|"
+        index += 1
 
     regex += ")"
 
-    return regex
+    return re.compile(regex, flags)
 #}}}
 
-_colour_codes_cache = None
-_colour_special_codes_cache = None
-_wildcard_regex = None
 def colourify_file(filename): #{{{
     """Colourify filename as ls would using LS_COLORS."""
-    global _colour_codes_cache, _colour_special_codes_cache, _wildcard_regex
-    if _colour_codes_cache is None and _colour_special_codes_cache is None:
-        codes, special_codes = parse_ls_colours()
+    codes, special_codes = parse_ls_colours()
+    if not codes and not special_codes:
+        return filename
 
-        if not codes and not special_codes:
-            return filename
-
-        wildcard_regex = re.compile(translate(codes.keys()))
-
-        _colour_codes_cache = codes
-        _colour_special_codes_cache = special_codes
-        _wildcard_regex = wildcard_regex
-    else:
-        codes = _colour_codes_cache
-        special_codes = _colour_special_codes_cache
-        wildcard_regex = _wildcard_regex
+    wildcard_regex = translate(codes)
 
     try:
         mode = os.stat(filename)[0]

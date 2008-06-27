@@ -24,7 +24,27 @@ import inspect
 import os
 import sys
 
-__all__ = [ "exiting_signal_handler" ]
+__all__ = [ "cache_return", "exiting_signal_handler" ]
+
+class cache_return:
+    """Decorator to cache the return values of a function."""
+    def __init__(self, function):
+        self.function = function
+        # Use two lists instead of a dictionary
+        # so unhashable objects can be cached as well.
+        self.cache_args = []
+        self.cache_rets = []
+
+    def __call__(self, *args):
+        if args in self.cache_args:
+            return self.cache_rets[self.cache_args.index(args)]
+        else:
+            ret = self.function(*args)
+
+            self.cache_args.append(args)
+            self.cache_rets.append(ret)
+
+            return ret
 
 def _get_module_name(path):
     """Get module name"""
