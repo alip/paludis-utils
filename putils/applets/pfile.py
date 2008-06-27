@@ -46,7 +46,7 @@ def parse_command_line(): #{{{
 
     option_group_query = OptionGroup(parser, "Query Options")
     option_group_query.add_option("-M", "--matcher", dest = "matcher",
-            type = "choice", default = "simple", metavar="ALG",
+            type = "choice", default = "exact", metavar="ALG",
             choices = [ "regex", "fnmatch", "simple", "exact" ],
             help = """Which match algorithm to use.
 One of regex, fnmatch, simple, exact. Default: %default""")

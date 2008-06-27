@@ -113,7 +113,7 @@ def get_contents(package, env, source_repos = [],
     #}}}
 #}}}
 
-def search_contents(path, env, matcher="simple", ignore_case=False, #{{{
+def search_contents(path, env, matcher="exact", ignore_case=False, #{{{
         requested_instances=[object]):
     """Search filename in contents of installed packages."""
 
