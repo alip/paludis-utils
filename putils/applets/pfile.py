@@ -73,16 +73,16 @@ def main(config=None): #{{{
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     if options.colour:
-        from putils.colours import colourify_file
+        from putils.colours import colourify_content
     else:
-        colourify_file = lambda f: f
+        from putils.colours import no_colourify_content as colourify_content
 
     for filename in args:
         content_generator = search_contents(filename, env, options.matcher,
                 options.ignore_case, options.requested_instances)
 
         for package_id, content in content_generator:
-            print package_id, colourify_file(content.name)
+            print package_id, colourify_content(content)
 #}}}
 
 if __name__ == '__main__':

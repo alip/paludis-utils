@@ -17,69 +17,27 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""Colorify filenames using LS_COLORS
+"""Colourify filenames using LS_COLORS
+There are some differences to ls(1)'s behaviour.
+For performance reasons we first check wildcards before stat()'ing the file and
+checking whether it's setuid, setgid, executable etc.
 """
 
 import os
 import fnmatch
 import re
 
-from stat import *
+from stat import S_IMODE
+
+from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
+        ContentsFileEntry, ContentsSymEntry, ContentsMiscEntry)
 
 from putils.common import cache_return
 
-__all__ = [ "colourify_file" ]
+__all__ = [ "colourify_content" , "no_colourify_content" ]
 
 # Special keys in LS_COLORS
-# The lambda functions are only called if the file exists!
-special_keys = {
-        # Normal
-        "no" : lambda f, mode: True,
-        # File
-        "fi" : lambda f, mode: S_ISREG(mode),
-        # Directory
-        "di" : lambda f, mode: S_ISDIR(mode),
-        # Symbolic link
-        "ln" : lambda f, mode: os.path.islink(f),
-        # Fifo
-        "pi" : lambda f, mode: S_ISFIFO(mode),
-        # Socket
-        "so" : lambda f, mode: S_ISSOCK(mode),
-        # Door FIXME
-        "do" : lambda f, mode: False,
-        # Block device driver
-        "bd" : lambda f, mode: S_ISBLK(mode),
-        # Character device driver
-        "cd" : lambda f, mode: S_ISCHR(mode),
-        # Orphaned symlinks
-        "or" : lambda f, mode: (os.path.islink(f) and
-                            not os.path.exists(os.path.realpath(f))),
-        # Missing files
-        "mi" : lambda f, mode: False,
-        # File that is setuid (u+s)
-        "su" : lambda f, mode: (S_ISREG(mode) and
-                            S_IMODE(mode) & 04000),
-        # File that is setgid (g+s)
-        "sg" : lambda f, mode: (S_ISREG(mode) and
-                            S_IMODE(mode) & 02000),
-        # Dir that is sticky and other-writable (+t,o+w)
-        "tw" : lambda f, mode: (S_ISDIR(mode) and
-                            S_IMODE(mode) & 01000 and
-                            S_IMODE(mode) & 0002 ),
-        # Dir that is other-writable (o+w) and not sticky
-        "ow" : lambda f, mode: (S_ISDIR(mode) and
-                            S_IMODE(mode) & 0002 and
-                            S_IMODE(mode) & 01000 == 0),
-        # Dir that is sticky and not other-writable
-        "st" : lambda f, mode: (S_ISDIR(mode) and
-                            S_IMODE(mode) & 01000 and
-                            S_IMODE(mode) & 0002 == 0),
-        # Executable
-        "ex" : lambda f, mode: S_ISREG(mode) and os.access(f, os.X_OK),
-}
-# The order in which we should check them,
-# From most specific to least specific
-special_keys_sorted = ( "tw", "ow", "st", "su", "sg", "or", "ln", "pi", "so", "do",
+lscolours_keys = ( "tw", "ow", "st", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
 @cache_return
@@ -99,7 +57,7 @@ def parse_ls_colours(): #{{{
 
         key, colour_code = equation.split("=")
 
-        if key in special_keys_sorted:
+        if key in lscolours_keys:
             special_codes[key] = colour_code
         else:
             codes[key] = colour_code
@@ -125,42 +83,72 @@ def translate(wildcards, flags=0): #{{{
     return re.compile(regex, flags)
 #}}}
 
-def colourify_file(filename): #{{{
-    """Colourify filename as ls would using LS_COLORS."""
+def colourify_file(filename, colour_codes, special_codes, root=""):
+    """Colourify given filename."""
+    wildcard_regex = translate(colour_codes)
+    match = wildcard_regex.match(filename)
+
+    if match is not None:
+        # The first matched group is the parent, skip it.
+        key_index = list(match.groups()[1:]).index(filename)
+        key = colour_codes.keys()[key_index]
+
+        return "\033[" + colour_codes[key] + "m" + root + filename + "\033[m"
+    else:
+        # Only stat() files here.
+        # TODO users should be able to customize the behaviour and avoid this stat()
+        try:
+            mode = os.stat(filename)[0]
+        except OSError, e:
+            if e.errno == 2: # File doesn't exist
+                return "\033[" + special_codes.get("mi", "00") + "m" + root + filename + "\033[m"
+            elif e.errno == 13: # Not allowed to stat()
+                return "\033[7m" + root + filename + "\033[m"
+        else:
+            if S_IMODE(mode) & 04000: # File is setuid (u+s)
+                return "\033[" + special_codes.get("su", "00") + "m" + root + filename + "\033[m"
+            elif S_IMODE(mode) & 02000: # File is setgid (g+s)
+                return "\033[" + special_codes.get("sg", "00") + "m" + root + filename + "\033[m"
+            elif os.access(filename, os.X_OK): # File is executable
+                return "\033[" + special_codes.get("ex", "00") + "m" + root + filename + "\033[m"
+            else:
+                return root + filename
+
+def colourify_content(content, root="", target=False):
+    """Colourify content name using LS_COLORS.
+    If target is True and content is a symbolic link,
+    colourify content.target instead of content.name."""
+
     codes, special_codes = parse_ls_colours()
     if not codes and not special_codes:
-        return filename
+        return content.name
 
-    wildcard_regex = translate(codes)
+    if root:
+        root += os.path.sep
 
-    try:
-        mode = os.stat(filename)[0]
-    except OSError, e:
-        if e.errno == 2: # File doesn't exist
-            missing = True
-        elif e.errno == 13: # Not allowed to stat()
-            missing = False
-        mode = False
-
-    if mode:
-        match = wildcard_regex.match(filename)
-        if match is not None:
-            # The first matched group is the parent, skip it.
-            key_index = list(match.groups()[1:]).index(filename)
-            key = codes.keys()[key_index]
-
-            return "\033[" + codes[key] + "m" + filename + "\033[m"
-
-        for key in special_keys_sorted:
-            if special_keys[key](filename, mode):
-                return "\033[" + special_codes[key] + "m" + filename + "\033[m"
-    elif missing:
-        # File is missing -- "mi"
-        return "\033[" + special_codes["mi"] + "m" + filename + "\033[m"
+    if isinstance(content, ContentsDevEntry):
+        return "\033[" + special_codes.get("bd", "00") + "m" + root + content.name + "\033[m"
+    elif isinstance(content, ContentsDirEntry):
+        return "\033[" + special_codes.get("di", "00") + "m" + root + content.name + "\033[m"
+    elif isinstance(content, ContentsFifoEntry):
+        return "\033[" + special_codes.get("pi", "00") + "m" + root + content.name + "\033[m"
+    elif isinstance(content, ContentsFileEntry):
+        return colourify_file(content.name, codes, special_codes, root)
+    elif isinstance(content, ContentsSymEntry):
+        if not target:
+            return "\033[" + special_codes.get("ln", "00") + "m" + root + content.name + "\033[m"
+        elif os.path.isabs(content.target):
+            return colourify_file(content.target, codes, special_codes, root)
+        else:
+            dname = os.path.dirname(content.name)
+            abstarget = os.path.join(dname, content.target)
+            return colourify_file(abstarget, codes, special_codes, root).replace(
+                        dname + os.path.sep, '')
     else:
-        # Permission denied
-        return "\033[7m" + filename + "\033[m"
+        return root + content.name
 
-    return filename
-#}}}
-
+def no_colourify_content(content, root="", target=False):
+    """Dummy replacement for colourify_content() with no colouring."""
+    if root: root += os.path.sep
+    if target: return root + content.target
+    else: return root + content.name

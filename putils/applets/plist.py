@@ -93,9 +93,9 @@ def main(config=None): #{{{
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
     if options.colour:
-        from putils.colours import colourify_file
+        from putils.colours import colourify_content
     else:
-        colourify_file = lambda f: f
+        from putils.colours import no_colourify_content as colourify_content
 
     canonical_form = getattr(PackageIDCanonicalForm, options.canonical.upper())
 
@@ -112,27 +112,16 @@ def main(config=None): #{{{
             print package_id.canonical_form(canonical_form)
             for content in contents:
                 if options.root:
-                    print colourify_file(
-                            os.path.sep.join((env.root, content.name))
-                            ),
+                    print colourify_content(content, root),
                 else:
-                    print colourify_file(content.name),
+                    print colourify_content(content),
 
                 if options.print_symlink_target and hasattr(content, "target"):
                     print "->",
-                    if os.path.isabs(content.target):
-                        if options.root:
-                            print colourify_file(
-                                    os.path.sep.join((env.root, content.target))
-                                    )
-                        else:
-                            print colourify_file(content.target)
+                    if options.root:
+                        print colourify_content(content, root, target=True)
                     else:
-                        abstarget = os.path.sep.join(
-                                (os.path.dirname(content.name), content.target)
-                                )
-                        print colourify_file(abstarget).replace(
-                                os.path.dirname(content.name) + os.path.sep, '')
+                        print colourify_content(content, target=True)
                 else:
                     print
 #}}}
