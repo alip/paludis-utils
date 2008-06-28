@@ -35,13 +35,13 @@ class cache_return:
         self.cache_args = []
         self.cache_rets = []
 
-    def __call__(self, *args):
-        if args in self.cache_args:
-            return self.cache_rets[self.cache_args.index(args)]
+    def __call__(self, *args, **kwargs):
+        if (args,kwargs) in self.cache_args:
+            return self.cache_rets[self.cache_args.index((args,kwargs))]
         else:
-            ret = self.function(*args)
+            ret = self.function(*args, **kwargs)
 
-            self.cache_args.append(args)
+            self.cache_args.append((args,kwargs))
             self.cache_rets.append(ret)
 
             return ret
