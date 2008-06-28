@@ -40,6 +40,17 @@ PMS_VERSION = re.compile("""
     )
     (-(?P<revision>r\d+))?""", re.VERBOSE)
 
+
+# Use builtin any() if available (New in Python-2.5)
+try:
+    any
+except NameError:
+    def any(iterable):
+        for i in iterable:
+            if bool(i) is True:
+                return True
+        return False
+
 def abspath(path, root):
     """If root is / then return path,
     else return root + / + path."""
@@ -93,8 +104,8 @@ def get_contents(package, env, source_repos = [],
 
             requested_contents = list()
             for content in package_id.contents_key().value():
-                if not True in [isinstance(content, i) for i in
-                        requested_instances]:
+                if not any([isinstance(content, i) for i in
+                    requested_instances]):
                     continue
 
                 content_path = abspath(content.name, env.root)
