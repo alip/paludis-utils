@@ -104,7 +104,17 @@ def main():
         print >>sys.stderr, "Try p --help"
         sys.exit(1)
 
-    applet.main()
+    # User customization
+    try:
+        import putils.user as config
+    except Exception, e:
+        from paludis import Log, LogContext, LogLevel
+        Log.instance.message("user_file.invalid", LogLevel.WARNING,
+                LogContext.NO_CONTEXT,
+                "User customization file constains error: %s" % e.message)
+        config = None
+
+    applet.main(config)
 
 if __name__ == '__main__':
     main()

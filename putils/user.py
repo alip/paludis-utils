@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@itu.edu.tr>
 #
@@ -17,16 +17,25 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""putils -- Common code used by paludis-utils clients.
+"""Hook to allow user-specified customization code to run.
 """
 
-__name__ = "paludis-utils"
-__version__ = "0.1"
-__author__ = "Ali Polatel <polatel@itu.edu.tr>"
-__license__ = "GPL-2"
-__copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
-        __name__ + " is free software, " +\
-        "and you are welcome to redistribute it under the terms of " +\
-        "the GNU General Public License, version 2."
+# Based on user module from stdlib
 
-__all__ = [ "applets", "colours", "common", "getopt", "packages", "user" ]
+import os
+
+home = os.curdir
+if "HOME" in os.environ:
+    home = os.environ["HOME"]
+elif os.name == "posix":
+    home = os.path.expanduser("~/")
+
+putils_rc = os.path.join(home, ".p/putils_conf.py")
+try:
+    f = open(putils_rc)
+except IOError:
+    pass
+else:
+    f.close()
+    execfile(putils_rc)
+

@@ -62,7 +62,7 @@ def parse_command_line(): #{{{
 
     return options, args
 
-def main(): #{{{
+def main(config=None): #{{{
     options, args = parse_command_line()
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
