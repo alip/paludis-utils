@@ -87,7 +87,7 @@ def check_regex_choice(option, opt, value):
                 map(_regex_strip_name, option.choices)))
 
     raise OptionValueError("""option %s: invalid choice: %r
-Choice must match one of the following regexps:
+Choice must match one of the following regular expressions:
 %s""" % (opt, value, choices))
 
 class SmartOption(Option):
