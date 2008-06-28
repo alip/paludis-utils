@@ -94,7 +94,7 @@ def main():
             sys.exit(0)
         else:
             applet_name = args[0]
-            sys.argv = sys.argv[1:]
+            sys.argv = sys.argv[sys.argv.index(applet_name):]
     else:
         applet_name = os.path.basename(sys.argv[0])
 
