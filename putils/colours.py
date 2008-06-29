@@ -33,6 +33,10 @@ from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
         ContentsFileEntry, ContentsSymEntry, ContentsMiscEntry)
 
 from putils.common import cache_return
+import putils.user
+
+STAT_FILES = bool(getattr(putils.user, "colours_stat_files", 1))
+COLOUR_PERM_DENIED = getattr(putils.user, "colours_perm_denied", "7m")
 
 __all__ = [ "colourify_content" , "no_colourify_content" ]
 
@@ -95,15 +99,19 @@ def colourify_file(filename, colour_codes, special_codes, root=""):
 
         return "\033[" + colour_codes[key] + "m" + root + filename + "\033[m"
     else:
+        global STAT_FILES
+        if not STAT_FILES:
+            return root + filename
+
         # Only stat() files here.
-        # TODO users should be able to customize the behaviour and avoid this stat()
         try:
             mode = os.stat(filename)[0]
         except OSError, e:
             if e.errno == 2: # File doesn't exist
                 return "\033[" + special_codes.get("mi", "00") + "m" + root + filename + "\033[m"
             elif e.errno == 13: # Not allowed to stat()
-                return "\033[7m" + root + filename + "\033[m"
+                global COLOUR_PERM_DENIED
+                return "\033[" + COLOUR_PERM_DENIED + root + filename + "\033[m"
         else:
             if S_IMODE(mode) & 04000: # File is setuid (u+s)
                 return "\033[" + special_codes.get("su", "00") + "m" + root + filename + "\033[m"
