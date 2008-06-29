@@ -86,8 +86,6 @@ def main(): #{{{
     else:
         from putils.colours import no_colourify_content as colourify_content
 
-    canonical_form = getattr(PackageIDCanonicalForm, options.canonical.upper())
-
     for package in args:
         content_generator = get_contents(package, env, options.source_repos,
                 options.requested_instances, options.selection,
@@ -98,7 +96,7 @@ def main(): #{{{
                 print "\033[1;35m*\033[0m",
             else:
                 print "*",
-            print package_id.canonical_form(canonical_form)
+            print package_id.canonical_form(PackageIDCanonicalForm.FULL)
             for content in contents:
                 if options.root:
                     print colourify_content(content, root),
