@@ -37,5 +37,11 @@ except IOError:
     pass
 else:
     f.close()
-    execfile(putils_rc)
+    try:
+        execfile(putils_rc)
+    except Exception, e:
+        from paludis import Log, LogContext, LogLevel
+        Log.instance.message("user_file.invalid", LogLevel.WARNING,
+                LogContext.NO_CONTEXT,
+                "User customization file constains error: %s" % e.message)
 

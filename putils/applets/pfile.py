@@ -68,7 +68,7 @@ One of regex, fnmatch, simple, exact. Default: %default""")
     return options, args
 #}}}
 
-def main(config=None): #{{{
+def main(): #{{{
     options, args = parse_command_line()
     env = EnvironmentMaker.instance.make_from_spec(options.environment)
 
