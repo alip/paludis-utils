@@ -39,10 +39,7 @@ def parse_command_line(): #{{{
     parser = PaludisOptionParser()
     parser.usage = usage.replace("<filename>", "<filename>...")
 
-    parser.add_option("-C", "--no-colour", action = "store_false",
-            dest = "colour", default = True,
-            help = "Don't output colour")
-
+    parser.add_default_format_options()
     parser.add_default_content_limit_options()
 
     option_group_query = OptionGroup(parser, "Query Options")
