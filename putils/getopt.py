@@ -125,8 +125,10 @@ class SmartOption(Option):
 class PaludisOptionParser(OptionParser, object):
     """OptionParser specialized for Paludis."""
 
-    __options_query = False
+    # TODO use a decorator to do this.
     __options_content_limit = False
+    __options_format = False
+    __options_query = False
 
     def __init__(self,
                  usage=None,
@@ -209,19 +211,41 @@ class PaludisOptionParser(OptionParser, object):
 
         return (options, args)
 
+    def add_default_format_options(self, title="Formatting Options"):
+        """Add default formating options."""
+
+        if self.__options_format:
+            return None
+        else:
+            self.__options_format = True
+
+        option_group_format = OptionGroup(self, title)
+        option_group_format.add_option("-C", "--no-colour", action = "store_false",
+                dest = "colour", default = True,
+                help = "Don't output colour")
+        option_group_format.add_option("", "--no-color", action = "store_false",
+                dest = "colour", default = True,
+                help = "Alias for --no-colour")
+
+        return self.add_option_group(option_group_format)
+
     def add_default_query_options(self, title="Query Options"):
         """Add default query options."""
 
-        if not self.__options_query:
-            option_group_query = OptionGroup(self, title)
+        if self.__options_query:
+            return None
+        else:
+            self.__options_query = True
 
-            help_selection = """Specify selection. One of:
+        option_group_query = OptionGroup(self, title)
+
+        help_selection = """Specify selection. One of:
 all-versions-grouped-by-slot, all-versions-sorted, all-versions-unsorted,
 best-version-in-each-slot, best-version-only, require-exactly-one, some-arbitrary-version
                         Default: %default"""
 
-            option_group_query.add_option("-S", "--selection", type = "regex_choice",
-                    choices = [
+        option_group_query.add_option("-S", "--selection", type = "regex_choice",
+                choices = [
 """^(?P<AllVersionsUnsorted>
 avu|
 (all-versions-u
@@ -258,47 +282,50 @@ sav|
     )?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?)?
 ))$""" ],
 
-                    regex_flag = re.VERBOSE,
-                    action = "store", dest = "selection",
-                    default = "all-versions-grouped-by-slot", help = help_selection )
-            option_group_query.add_option("-e", "--regexp", dest = "regexp",
-                    metavar = "PATTERN", help = "List files matching PATTERN")
-            option_group_query.add_option("-n", "--fnmatch", dest = "fnpattern",
-                    metavar = "PATTERN",
-                    help = "List files matching PATTERN using Unix shell-style wildcards")
-            option_group_query.add_option("-i", "--ignore-case", action = "store_true",
-                    dest = "ignore_case", help = "Ignore case distinctions in PATTERN")
+                regex_flag = re.VERBOSE,
+                action = "store", dest = "selection",
+                default = "all-versions-grouped-by-slot", help = help_selection )
+        option_group_query.add_option("-e", "--regexp", dest = "regexp",
+                metavar = "PATTERN", help = "List only the files matching PATTERN")
+        option_group_query.add_option("-n", "--fnmatch", dest = "fnpattern",
+                metavar = "PATTERN",
+                help = "List only the files matching PATTERN using Unix shell-style wildcards")
+        option_group_query.add_option("-i", "--ignore-case", action = "store_true",
+                dest = "ignore_case", help = "Ignore case distinctions in PATTERN")
 
-            self.add_option_group(option_group_query)
-        self.__options_query = True
+        return self.add_option_group(option_group_query)
 
     def add_default_content_limit_options(self,
             title="Limiting by type of content"):
         """Add default limit options."""
 
-        if not self.__options_content_limit:
-            option_group_climit = OptionGroup(self, title)
+        if self.__options_content_limit:
+            return None
+        else:
+            self.__options_content_limit = True
 
-            option_group_climit.add_option("-d", "--dir", action = "store_true",
-                    dest = "list_Dir", default = False,
-                    help = "List directories")
-            option_group_climit.add_option("-f", "--file", action = "store_true",
-                    dest = "list_File", default = False,
-                    help = "List files")
-            option_group_climit.add_option("-m", "--misc", action = "store_true",
-                    dest = "list_Misc", default = False,
-                    help = "List misc entries")
-            option_group_climit.add_option("-s", "--symlink", action = "store_true",
-                    dest = "list_Sym", default = False,
-                    help = "List symlinks")
-            option_group_climit.add_option("-D", "--device", action = "store_true",
-                    dest = "list_Dev", default = False,
-                    help = "List devices")
-            option_group_climit.add_option("-F", "--fifo", action = "store_true",
-                    dest = "list_Fifo", default = False,
-                    help = "List fifos")
-            self.add_option_group(option_group_climit)
-        self.__options_content_limit = True
+        option_group_climit = OptionGroup(self, title)
+
+        option_group_climit.add_option("-d", "--dir", action = "store_true",
+                dest = "list_Dir", default = False,
+                help = "List directories")
+        option_group_climit.add_option("-f", "--file", action = "store_true",
+                dest = "list_File", default = False,
+                help = "List files")
+        option_group_climit.add_option("-m", "--misc", action = "store_true",
+                dest = "list_Misc", default = False,
+                help = "List misc entries")
+        option_group_climit.add_option("-s", "--symlink", action = "store_true",
+                dest = "list_Sym", default = False,
+                help = "List symlinks")
+        option_group_climit.add_option("-D", "--device", action = "store_true",
+                dest = "list_Dev", default = False,
+                help = "List devices")
+        option_group_climit.add_option("-F", "--fifo", action = "store_true",
+                dest = "list_Fifo", default = False,
+                help = "List fifos")
+
+        return self.add_option_group(option_group_climit)
 
     # Option callbacks
     def cb_version(self, option, opt_str, value, parser):

@@ -41,27 +41,16 @@ def parse_command_line(): #{{{
     parser = PaludisOptionParser()
     parser.usage = usage.replace("<pkgname>", "<pkgname>...")
 
-    # Listing Entries
-    parser.add_default_content_limit_options()
-
-    #{{{Format options
-    option_group_format = OptionGroup(parser, "Formatting Options")
+    option_group_format = parser.add_default_format_options()
     option_group_format.add_option("-r", "--root", action = "store_true",
             dest = "root", default = False,
             help = "Add ROOT as prefix to paths.")
     option_group_format.add_option("-t", "--target", action = "store_true",
             dest = "print_symlink_target", default = False,
             help = "Print targets for symlinks")
-    parser.add_option_group(option_group_format)
-    option_group_format.add_option("", "--canonical-form", type = "choice",
-            choices = [ "full", "version", "no_version" ],
-            default = "full", dest = "canonical", metavar="FORM",
-            help = """The canonical form to print package ids.
-One of: full, version, no_version. Default: %default""")
-    option_group_format.add_option("-C", "--no-colour", action = "store_false",
-            dest = "colour", default = True,
-            help = "Don't output colour")
-    #}}}
+
+    # Listing Entries
+    parser.add_default_content_limit_options()
 
     #{{{Matching by repository
     option_group_repo = OptionGroup(parser, "Matching by repository")
