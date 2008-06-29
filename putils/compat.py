@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@itu.edu.tr>
 #
@@ -17,16 +17,21 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""putils -- Common code used by paludis-utils clients.
+"""Compatibility between Python versions
 """
 
-__name__ = "paludis-utils"
-__version__ = "0.1"
-__author__ = "Ali Polatel <polatel@itu.edu.tr>"
-__license__ = "GPL-2"
-__copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
-        __name__ + " is free software, " +\
-        "and you are welcome to redistribute it under the terms of " +\
-        "the GNU General Public License, version 2."
+import sys
 
-__all__ = [ "applets", "colours", "common", "compat", "getopt", "packages", "user" ]
+__all__ = [ "any" ]
+
+# builtin any() is new in Python-2.5
+if sys.hexversion < 0x02050000:
+    def any(iterable):
+        for i in iterable:
+            if bool(i):
+                return True
+        return False
+else:
+    import __builtin__
+    any = __builtin__.any
+

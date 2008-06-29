@@ -30,6 +30,8 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
         VersionSpec, UserPackageDepSpecOption, QualifiedPackageNameError,
         parse_user_package_dep_spec)
 
+from putils.compat import any
+
 __all__ = [ "abspath", "compare_atoms", "get_contents", "search_contents", "split_atom" ]
 
 PMS_VERSION = re.compile("""
@@ -40,16 +42,6 @@ PMS_VERSION = re.compile("""
     )
     (-(?P<revision>r\d+))?""", re.VERBOSE)
 
-
-# Use builtin any() if available (New in Python-2.5)
-try:
-    any
-except NameError:
-    def any(iterable):
-        for i in iterable:
-            if bool(i) is True:
-                return True
-        return False
 
 def abspath(path, root):
     """If root is / then return path,
