@@ -108,7 +108,7 @@ def get_contents(package, env, source_repos = [],
                     else:
                         if not fnmatch.fnmatch(content_path, fnpattern):
                             continue
-                if regexp is not None and pattern.match(content_path) is None:
+                if regexp is not None and pattern.search(content_path) is None:
                     continue
                 requested_contents.append(content)
 
