@@ -91,13 +91,8 @@ def get_contents(package, env, source_repos = [],
                 else:
                     repo_origin = package_id.from_repositories_key()
 
-                    repo_found = False
-                    for repo in repo_origin.value():
-                        if repo in source_repos:
-                            repo_found = True
-                            break
-
-                    if not repo_found:
+                    if not any(repo in source_repos for repo in
+                            repo_origin.value()):
                         continue
             #}}}
 
