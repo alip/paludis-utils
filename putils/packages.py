@@ -84,13 +84,20 @@ def get_contents(package, env, source_repos = [],
         else:
             #{{{Match by source repository
             if source_repos:
-                if package_id.source_origin_key() is None:
+                if package_id.from_repositories_key() is None:
                     Log.instance.message("vdb.no_source_origin",
                             LogLevel.WARNING, LogContext.NO_CONTEXT,
-                            "'%s' does not provide a source origin key." % package_id.name)
+                            "'%s' does not provide a from repositories key." % package_id.name)
                 else:
-                    source_origin = package_id.source_origin_key()
-                    if source_origin.value() not in source_repos:
+                    repo_origin = package_id.from_repositories_key()
+
+                    repo_found = False
+                    for repo in repo_origin.value():
+                        if repo in source_repos:
+                            repo_found = True
+                            break
+
+                    if not repo_found:
                         continue
             #}}}
 
