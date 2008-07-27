@@ -99,16 +99,17 @@ def main(): #{{{
             print package_id.canonical_form(PackageIDCanonicalForm.FULL)
             for content in contents:
                 if options.root:
-                    print colourify_content(content, root),
+                    print colourify_content(content, env.root),
                 else:
-                    print colourify_content(content),
+                    print colourify_content(content, env.root).replace(env.root, ""),
 
                 if options.print_symlink_target and hasattr(content, "target"):
                     print "->",
                     if options.root:
-                        print colourify_content(content, root, target=True)
+                        print colourify_content(content, env.root, target=True)
                     else:
-                        print colourify_content(content, target=True)
+                        print colourify_content(content, env.root,
+                                target=True).replace(env.root, "")
                 else:
                     print
 #}}}

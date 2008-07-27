@@ -33,6 +33,7 @@ from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
         ContentsFileEntry, ContentsSymEntry, ContentsMiscEntry)
 
 from putils.common import cache_return
+from putils.util import rootjoin
 import putils.user
 
 STAT_FILES = bool(getattr(putils.user, "colours_stat_files", 1))
@@ -87,7 +88,7 @@ def translate(wildcards, flags=0): #{{{
     return re.compile(regex, flags)
 #}}}
 
-def colourify_file(filename, colour_codes, special_codes, root=""):
+def colourify_file(filename, colour_codes, special_codes):
     """Colourify given filename."""
     wildcard_regex = translate(colour_codes)
     match = wildcard_regex.match(filename)
@@ -97,7 +98,7 @@ def colourify_file(filename, colour_codes, special_codes, root=""):
         key_index = list(match.groups()[1:]).index(filename)
         key = colour_codes.keys()[key_index]
 
-        return "\033[" + colour_codes[key] + "m" + root + filename + "\033[m"
+        return "\033[" + colour_codes[key] + "m" + filename + "\033[m"
     else:
         global STAT_FILES
         if not STAT_FILES:
@@ -108,55 +109,63 @@ def colourify_file(filename, colour_codes, special_codes, root=""):
             mode = os.stat(filename)[0]
         except OSError, e:
             if e.errno == 2: # File doesn't exist
-                return "\033[" + special_codes.get("mi", "00") + "m" + root + filename + "\033[m"
+                return "\033[" + special_codes.get("mi", "00") + "m" + filename + "\033[m"
             elif e.errno == 13: # Not allowed to stat()
                 global COLOUR_PERM_DENIED
                 return "\033[" + COLOUR_PERM_DENIED + root + filename + "\033[m"
         else:
             if S_IMODE(mode) & 04000: # File is setuid (u+s)
-                return "\033[" + special_codes.get("su", "00") + "m" + root + filename + "\033[m"
+                return "\033[" + special_codes.get("su", "00") + "m" + filename + "\033[m"
             elif S_IMODE(mode) & 02000: # File is setgid (g+s)
-                return "\033[" + special_codes.get("sg", "00") + "m" + root + filename + "\033[m"
+                return "\033[" + special_codes.get("sg", "00") + "m" + filename + "\033[m"
             elif os.access(filename, os.X_OK): # File is executable
-                return "\033[" + special_codes.get("ex", "00") + "m" + root + filename + "\033[m"
+                return "\033[" + special_codes.get("ex", "00") + "m" + filename + "\033[m"
             else:
-                return root + filename
+                return filename
 
 def colourify_content(content, root="", target=False):
     """Colourify content name using LS_COLORS.
     If target is True and content is a symbolic link,
     colourify content.target instead of content.name."""
 
+    content_name = rootjoin(content.name, root)
+
     codes, special_codes = parse_ls_colours()
     if not codes and not special_codes:
-        return content.name
-
-    if root:
-        root += os.path.sep
+        return content_name
 
     if isinstance(content, ContentsDevEntry):
-        return "\033[" + special_codes.get("bd", "00") + "m" + root + content.name + "\033[m"
+        return "\033[" + special_codes.get("bd", "00") + "m" + content_name + "\033[m"
     elif isinstance(content, ContentsDirEntry):
-        return "\033[" + special_codes.get("di", "00") + "m" + root + content.name + "\033[m"
+        return "\033[" + special_codes.get("di", "00") + "m" + content_name + "\033[m"
     elif isinstance(content, ContentsFifoEntry):
-        return "\033[" + special_codes.get("pi", "00") + "m" + root + content.name + "\033[m"
+        return "\033[" + special_codes.get("pi", "00") + "m" + content_name + "\033[m"
     elif isinstance(content, ContentsFileEntry):
-        return colourify_file(content.name, codes, special_codes, root)
+        return colourify_file(content_name, codes, special_codes)
     elif isinstance(content, ContentsSymEntry):
         if not target:
-            return "\033[" + special_codes.get("ln", "00") + "m" + root + content.name + "\033[m"
+            return "\033[" + special_codes.get("ln", "00") + "m" + content_name + "\033[m"
         elif os.path.isabs(content.target):
-            return colourify_file(content.target, codes, special_codes, root)
+            content_target = rootjoin(content.target, root)
+            return colourify_file(content_target, codes, special_codes)
         else:
-            dname = os.path.dirname(content.name)
-            abstarget = os.path.join(dname, content.target)
-            return colourify_file(abstarget, codes, special_codes, root).replace(
+            dname = os.path.dirname(content_name)
+            abstarget = rootjoin(content.target, dname)
+            return colourify_file(abstarget, codes, special_codes).replace(
                         dname + os.path.sep, '')
     else:
-        return root + content.name
+        return content_name
 
 def no_colourify_content(content, root="", target=False):
     """Dummy replacement for colourify_content() with no colouring."""
-    if root: root += os.path.sep
-    if target: return root + content.target
-    else: return root + content.name
+    content_name = rootjoin(content.name, root)
+    if target:
+        if os.path.isabs(content.target):
+            return rootjoin(content.target, root)
+        else:
+            dname = os.path.dirname(content_name)
+            return rootjoin(content.target, dname).replace(
+                    dname + os.path.sep, '')
+    else:
+        return content_name
+

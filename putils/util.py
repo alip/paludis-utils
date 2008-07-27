@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@itu.edu.tr>
 #
@@ -17,18 +17,26 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""putils -- Common code used by paludis-utils clients.
+"""Common utilities
 """
 
-__name__ = "paludis-utils"
-__version__ = "0.1"
-__author__ = "Ali Polatel <polatel@itu.edu.tr>"
-__license__ = "GPL-2"
-__copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
-        __name__ + " is free software, " +\
-        "and you are welcome to redistribute it under the terms of " +\
-        "the GNU General Public License, version 2."
+__all__ = [ "rootjoin", ]
 
-__all__ = [ "applets", "colours", "common", "compat", "getopt", "packages",
-        "user", "util" ]
+import os
+
+def rootjoin(path, root):
+    """Smartly join path and root so there's no more than one / between them."""
+    if root == os.path.sep:
+        return path
+
+    if root.endswith(os.path.sep):
+        if path.startswith(os.path.sep):
+            return root[:-1] + path
+        else:
+            return root + path
+
+    if path.startswith(os.path.sep):
+        return root + path
+    else:
+        return root + os.path.sep + path
 

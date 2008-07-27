@@ -31,8 +31,9 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
         parse_user_package_dep_spec)
 
 from putils.compat import any
+from putils.util import rootjoin
 
-__all__ = [ "abspath", "compare_atoms", "get_contents", "search_contents", "split_atom" ]
+__all__ = [ "compare_atoms", "get_contents", "search_contents", "split_atom" ]
 
 PMS_VERSION = re.compile("""
     (?P<main_version>
@@ -41,15 +42,6 @@ PMS_VERSION = re.compile("""
         (?P<suffix>_alpha|_beta|_pre|_rc|_p(\d+)?)?
     )
     (-(?P<revision>r\d+))?""", re.VERBOSE)
-
-
-def abspath(path, root):
-    """If root is / then return path,
-    else return root + / + path."""
-    if root == os.path.sep:
-        return path
-    else:
-        return os.path.sep.join((root, path))
 
 def get_contents(package, env, source_repos = [],
         requested_instances = [object],
@@ -102,7 +94,7 @@ def get_contents(package, env, source_repos = [],
                     requested_instances]):
                     continue
 
-                content_path = abspath(content.name, env.root)
+                content_path = rootjoin(content.name, env.root)
                 if fnpattern is not None:
                     if ignore_case:
                         if not fnmatch.fnmatchcase(content_path, fnpattern):
@@ -149,7 +141,7 @@ def search_contents(path, env, matcher="exact", ignore_case=False, #{{{
                         requested_instances]:
                     continue
 
-                content_path = abspath(content.name, env.root)
+                content_path = rootjoin(content.name, env.root)
 
                 if (matcher == "exact" and
                         (path == content_path or
