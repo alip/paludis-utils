@@ -23,7 +23,7 @@
 import sys
 import re
 
-from paludis import EnvironmentMaker
+from paludis import EnvironmentFactory
 
 from putils.getopt import PaludisOptionParser
 from putils.packages import compare_atoms, split_atom
@@ -64,7 +64,7 @@ def parse_command_line(): #{{{
 
 def main(): #{{{
     options, args = parse_command_line()
-    env = EnvironmentMaker.instance.make_from_spec(options.environment)
+    env = EnvironmentFactory.instance.create(options.environment)
 
     if options.compare:
         ret = compare_atoms(args[0], args[1], env)
@@ -89,3 +89,4 @@ def main(): #{{{
 
 if __name__ == '__main__':
     main()
+

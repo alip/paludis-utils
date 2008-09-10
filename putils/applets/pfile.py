@@ -23,7 +23,7 @@
 import sys
 from optparse import OptionGroup
 
-from paludis import EnvironmentMaker
+from paludis import EnvironmentFactory
 
 from putils.getopt import PaludisOptionParser
 from putils.packages import search_contents
@@ -67,7 +67,7 @@ One of regex, fnmatch, simple, exact. Default: %default""")
 
 def main(): #{{{
     options, args = parse_command_line()
-    env = EnvironmentMaker.instance.make_from_spec(options.environment)
+    env = EnvironmentFactory.instance.create(options.environment)
 
     if options.colour:
         from putils.colours import colourify_content

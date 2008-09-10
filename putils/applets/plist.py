@@ -24,7 +24,7 @@ import os
 import sys
 from optparse import OptionGroup
 
-from paludis import (EnvironmentMaker, PackageIDCanonicalForm,
+from paludis import (EnvironmentFactory, PackageIDCanonicalForm,
         Log, LogLevel, LogContext)
 
 from putils.getopt import PaludisOptionParser
@@ -79,7 +79,7 @@ This option can be passed more than once to match more repositories.""")
 
 def main(): #{{{
     options, args = parse_command_line()
-    env = EnvironmentMaker.instance.make_from_spec(options.environment)
+    env = EnvironmentFactory.instance.create(options.environment)
 
     if options.colour:
         from putils.colours import colourify_content
@@ -116,3 +116,4 @@ def main(): #{{{
 
 if __name__ == '__main__':
     main()
+

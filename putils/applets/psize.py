@@ -27,7 +27,7 @@ from optparse import OptionGroup
 from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
         ContentsFileEntry, ContentsMiscEntry, ContentsSymEntry,
         Log, LogLevel, LogContext,
-        EnvironmentMaker, PackageIDCanonicalForm)
+        EnvironmentFactory, PackageIDCanonicalForm)
 
 from putils.getopt import PaludisOptionParser
 from putils.packages import get_contents
@@ -180,7 +180,7 @@ This option can be passed more than once to match more repositories.""")
 
 def main(): #{{{
     options, args = parse_command_line()
-    env = EnvironmentMaker.instance.make_from_spec(options.environment)
+    env = EnvironmentFactory.instance.create(options.environment)
 
     if options.display_size is None:
         options.display_size = SIZE_KILOBYTES
@@ -203,3 +203,4 @@ def main(): #{{{
 
 if __name__ == '__main__':
     main()
+
