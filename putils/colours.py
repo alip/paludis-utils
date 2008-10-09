@@ -36,6 +36,9 @@ from putils.common import cache_return
 from putils.util import rootjoin
 import putils.user
 
+# The number of named groups the re module supports.
+REGEX_GROUPS_MAX = 100
+
 STAT_FILES = bool(getattr(putils.user, "colours_stat_files", 1))
 COLOUR_PERM_DENIED = getattr(putils.user, "colours_perm_denied", "7m")
 
@@ -90,38 +93,42 @@ def translate(wildcards, flags=0): #{{{
 
 def colourify_file(filename, colour_codes, special_codes):
     """Colourify given filename."""
-    wildcard_regex = translate(colour_codes)
-    match = wildcard_regex.match(filename)
-
-    if match is not None:
-        # The first matched group is the parent, skip it.
-        key_index = list(match.groups()[1:]).index(filename)
-        key = colour_codes.keys()[key_index]
-
-        return "\033[" + colour_codes[key] + "m" + filename + "\033[m"
+    if len(colour_codes) > REGEX_GROUPS_MAX:
+        for wildcard in colour_codes:
+            if fnmatch.fnmatch(filename, wildcard):
+                return "\033[" + colour_codes[wildcard] + "m" + filename + "\033[m"
     else:
-        global STAT_FILES
-        if not STAT_FILES:
-            return root + filename
+        wildcard_regex = translate(colour_codes)
+        match = wildcard_regex.match(filename)
 
-        # Only stat() files here.
-        try:
-            mode = os.stat(filename)[0]
-        except OSError, e:
-            if e.errno == 2: # File doesn't exist
-                return "\033[" + special_codes.get("mi", "00") + "m" + filename + "\033[m"
-            elif e.errno == 13: # Not allowed to stat()
-                global COLOUR_PERM_DENIED
-                return "\033[" + COLOUR_PERM_DENIED + root + filename + "\033[m"
+        if match is not None:
+            # The first matched group is the parent, skip it.
+            key_index = list(match.groups()[1:]).index(filename)
+            key = colour_codes.keys()[key_index]
+
+            return "\033[" + colour_codes[key] + "m" + filename + "\033[m"
+
+    if not STAT_FILES:
+        return root + filename
+
+    # Only stat() files here.
+    try:
+        mode = os.stat(filename)[0]
+    except OSError, e:
+        if e.errno == 2: # File doesn't exist
+            return "\033[" + special_codes.get("mi", "00") + "m" + filename + "\033[m"
+        elif e.errno == 13: # Not allowed to stat()
+            global COLOUR_PERM_DENIED
+            return "\033[" + COLOUR_PERM_DENIED + root + filename + "\033[m"
+    else:
+        if S_IMODE(mode) & 04000: # File is setuid (u+s)
+            return "\033[" + special_codes.get("su", "00") + "m" + filename + "\033[m"
+        elif S_IMODE(mode) & 02000: # File is setgid (g+s)
+            return "\033[" + special_codes.get("sg", "00") + "m" + filename + "\033[m"
+        elif os.access(filename, os.X_OK): # File is executable
+            return "\033[" + special_codes.get("ex", "00") + "m" + filename + "\033[m"
         else:
-            if S_IMODE(mode) & 04000: # File is setuid (u+s)
-                return "\033[" + special_codes.get("su", "00") + "m" + filename + "\033[m"
-            elif S_IMODE(mode) & 02000: # File is setgid (g+s)
-                return "\033[" + special_codes.get("sg", "00") + "m" + filename + "\033[m"
-            elif os.access(filename, os.X_OK): # File is executable
-                return "\033[" + special_codes.get("ex", "00") + "m" + filename + "\033[m"
-            else:
-                return filename
+            return filename
 
 def colourify_content(content, root="", target=False):
     """Colourify content name using LS_COLORS.
