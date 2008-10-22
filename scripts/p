@@ -104,7 +104,7 @@ def main():
         print >>sys.stderr, "Try p --help"
         sys.exit(1)
 
-    applet.main()
+    return applet.main()
 
 if __name__ == '__main__':
     main()
