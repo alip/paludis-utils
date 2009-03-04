@@ -188,23 +188,18 @@ class PaludisOptionParser(OptionParser, object):
 
         # Requested instances
         if self.__options_content_limit:
-            from paludis import (ContentsDevEntry, ContentsDirEntry,
-                    ContentsFileEntry, ContentsFifoEntry, ContentsMiscEntry,
-                    ContentsSymEntry)
+            from paludis import (ContentsDirEntry, ContentsFileEntry,
+                    ContentsSymEntry, ContentsOtherEntry)
 
             ri = []
-            if options.list_Dev:
-                ri.append(ContentsDevEntry)
             if options.list_Dir:
                 ri.append(ContentsDirEntry)
-            if options.list_Fifo:
-                ri.append(ContentsFifoEntry)
             if options.list_File:
                 ri.append(ContentsFileEntry)
-            if options.list_Misc:
-                ri.append(ContentsMiscEntry)
             if options.list_Sym:
                 ri.append(ContentsSymEntry)
+            if options.list_Other:
+                ri.append(ContentsOtherEntry)
             if not ri:
                 ri.append(object)
             options.requested_instances = ri
@@ -312,18 +307,12 @@ sav|
         option_group_climit.add_option("-f", "--file", action = "store_true",
                 dest = "list_File", default = False,
                 help = "List files")
-        option_group_climit.add_option("-m", "--misc", action = "store_true",
-                dest = "list_Misc", default = False,
-                help = "List misc entries")
         option_group_climit.add_option("-s", "--symlink", action = "store_true",
                 dest = "list_Sym", default = False,
                 help = "List symlinks")
-        option_group_climit.add_option("-D", "--device", action = "store_true",
-                dest = "list_Dev", default = False,
-                help = "List devices")
-        option_group_climit.add_option("-F", "--fifo", action = "store_true",
-                dest = "list_Fifo", default = False,
-                help = "List fifos")
+        option_group_climit.add_option("-o", "--other", action = "store_true",
+                dest = "list_Other", default = False,
+                help = "List other entries")
 
         return self.add_option_group(option_group_climit)
 

@@ -103,7 +103,7 @@ def main(): #{{{
                 else:
                     print colourify_content(content, env.root),
 
-                if options.print_symlink_target and hasattr(content, "target"):
+                if options.print_symlink_target and hasattr(content, "target_key"):
                     print "->",
                     if options.root or env.root == os.path.sep:
                         print colourify_content(content, env.root, target=True)

@@ -26,9 +26,9 @@ import os
 import fnmatch
 import re
 
-from paludis import (Filter, Generator, Log, LogLevel, LogContext, Selection,
-        VersionSpec, UserPackageDepSpecOption, QualifiedPackageNameError,
-        parse_user_package_dep_spec)
+from paludis import (Filter, Generator, Log, LogLevel, LogContext,
+        MatchPackageOptions, Selection, VersionSpec, UserPackageDepSpecOption,
+        QualifiedPackageNameError, parse_user_package_dep_spec)
 
 from putils.compat import any
 from putils.util import rootjoin
@@ -65,8 +65,7 @@ def get_contents(package, env, source_repos = [],
     #}}}
 
     #{{{Get CONTENTS
-    ids = env[selection(Generator.Matches(package_dep_spec) |
-        filter_installed)]
+    ids = env[selection(Generator.Matches(package_dep_spec, MatchPackageOptions()) | filter_installed)]
 
     for package_id in ids:
         if package_id.contents_key() is None:
@@ -94,7 +93,8 @@ def get_contents(package, env, source_repos = [],
                     requested_instances]):
                     continue
 
-                content_path = rootjoin(content.name, env.root)
+                content_path = rootjoin(content.location_key().value(), env.root)
+
                 if fnpattern is not None:
                     if ignore_case:
                         if not fnmatch.fnmatchcase(content_path, fnpattern):
@@ -141,7 +141,7 @@ def search_contents(path, env, matcher="exact", ignore_case=False, #{{{
                         requested_instances]:
                     continue
 
-                content_path = rootjoin(content.name, env.root)
+                content_path = rootjoin(content.location_key().value(), env.root)
 
                 if (matcher == "exact" and
                         (path == content_path or

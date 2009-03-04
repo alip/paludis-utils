@@ -24,8 +24,8 @@ import os
 import sys
 from optparse import OptionGroup
 
-from paludis import (ContentsDevEntry, ContentsDirEntry, ContentsFifoEntry,
-        ContentsFileEntry, ContentsMiscEntry, ContentsSymEntry,
+from paludis import (ContentsDirEntry, ContentsFileEntry,
+        ContentsSymEntry, ContentsOtherEntry,
         Log, LogLevel, LogContext,
         EnvironmentFactory, PackageIDCanonicalForm)
 
@@ -55,22 +55,16 @@ _total_size = 0
 def content_stat(contents, root, sum=False): #{{{
     """Return a statistics of contents."""
 
-    stats = { "devices" : 0,
-        "directories" : 0,
-        "fifos" : 0,
+    stats = { "directories" : 0,
         "files" : 0,
-        "misc" : 0,
         "symlinks" : 0,
+        "other" : 0,
         "unknown" : 0 }
     size = 0
 
     for c in contents:
-        if isinstance(c, ContentsDevEntry):
-            stats["devices"] += 1
-        elif isinstance(c, ContentsDirEntry):
+        if isinstance(c, ContentsDirEntry):
             stats["directories"] += 1
-        elif isinstance(c, ContentsFifoEntry):
-            stats["fifos"] += 1
         elif isinstance(c, ContentsFileEntry):
             stats["files"] += 1
             c_path = os.path.sep.join((root, c.name))
@@ -80,10 +74,10 @@ def content_stat(contents, root, sum=False): #{{{
                 Log.instance.message("content.non_existant_file",
                         LogLevel.WARNING, LogContext.NO_CONTEXT,
                         "File \"%s\" doesn't exit!" % c_path)
-        elif isinstance(c, ContentsMiscEntry):
-            stats["misc"] += 1
         elif isinstance(c, ContentsSymEntry):
             stats["symlinks"] += 1
+        elif isinstance(c, ContentsOtherEntry):
+            stats["misc"] += 1
         else:
             stats["unknown"] += 1
 
