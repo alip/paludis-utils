@@ -67,7 +67,7 @@ def content_stat(contents, root, sum=False): #{{{
             stats["directories"] += 1
         elif isinstance(c, ContentsFileEntry):
             stats["files"] += 1
-            c_path = os.path.sep.join((root, c.name))
+            c_path = os.path.sep.join((root, c.location_key().value()))
             if os.path.exists(c_path):
                 size += os.path.getsize(c_path)
             else:
