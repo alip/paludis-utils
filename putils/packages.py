@@ -33,15 +33,7 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext,
 from putils.compat import any
 from putils.util import rootjoin
 
-__all__ = [ "compare_atoms", "get_contents", "search_contents", "split_atom" ]
-
-PMS_VERSION = re.compile("""
-    (?P<main_version>
-        (?P<bare_version>\d+(\.\d+)*)
-        (?P<letter>[a-z])?
-        (?P<suffix>_alpha|_beta|_pre|_rc|_p(\d+)?)?
-    )
-    (-(?P<revision>r\d+))?""", re.VERBOSE)
+__all__ = [ "get_contents", "search_contents" ]
 
 def get_contents(package, env, source_repos = [],
         requested_instances = [object],
@@ -154,80 +146,4 @@ def search_contents(path, env, matcher="exact", ignore_case=False, #{{{
                     yield package_id, content
                 elif matcher == "regex" and regex_matcher.search(content_path):
                     yield package_id, content
-#}}}
-
-def split_atom(atom, env): #{{{
-    """Split an atom into category, package, version, revision."""
-
-    global PMS_VERSION
-
-    category = ""
-    fake_category = "arnold-layne"
-    cat_pn_sep = "/"
-
-    if cat_pn_sep not in atom:
-        # Make package name look like a qualified package name.
-        atom = cat_pn_sep.join((fake_category, atom))
-        category = None
-    if PMS_VERSION.search(atom) and not atom.startswith("="):
-        # Make package name look like an exact version
-        atom = "=" + atom
-
-    if atom.endswith("/"):
-        category = re.sub("/+", "", atom)
-        return category, None, None, None
-
-    package_dep_spec = parse_user_package_dep_spec(atom, env, [])
-    qpn = package_dep_spec.package
-
-    if category is not None:
-        category = str(qpn.category)
-
-    package_name = str(qpn.package)
-
-    # Split version and revision
-    if atom.startswith("="):
-        version = PMS_VERSION.search(package_dep_spec.text)
-
-        if version is not None:
-            main_version = version.group("main_version")
-            if version.group("revision"):
-                revision = version.group("revision")
-            else:
-                revision = "r0"
-        else:
-            main_version = revision = None
-    else:
-        main_version = revision = None
-
-    return category, package_name, main_version, revision
-#}}}
-
-def compare_atoms(first_atom, second_atom, env): #{{{
-    """Compare two atoms
-
-    @return: None if atoms aren't equal, 0 if atoms are equal, 1 if the first
-        atom is greater, -1 if the second atom is greater.
-    """
-
-    category_1, name_1, version_1, revision_1 = split_atom(first_atom, env)
-    category_2, name_2, version_2, revision_2 = split_atom(second_atom, env)
-
-    if category_1 != category_2 or name_1 != name_2:
-        return None
-    elif (version_1 is None and version_2 is not None or
-            version_1 is not None and version_2 is None):
-        return None
-    elif None in (version_1, version_2):
-        return 0
-    else:
-        version_spec_1 = VersionSpec("-".join((version_1, revision_1)))
-        version_spec_2 = VersionSpec("-".join((version_2, revision_2)))
-
-        if version_spec_1 > version_spec_2:
-            return 1
-        elif version_spec_1 == version_spec_2:
-            return 0
-        else:
-            return -1
 #}}}
