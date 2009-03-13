@@ -20,6 +20,8 @@
 """Common functions used by applets
 """
 
+from __future__ import print_function
+
 import inspect
 import os
 import sys
@@ -63,12 +65,12 @@ def _get_module_name(path):
 
 def exiting_signal_handler(signum, frame):
     """Signal handler that prints the signal and exits."""
-    print >>sys.stderr, "\nCaught signal", signum,
+    print("\nCaught signal", signum, end=' ', file=sys.stderr)
     if frame.f_code.co_name is not None:
         module_name = _get_module_name(frame.f_code.co_filename)
-        print >>sys.stderr, "in %s()" % ".".join((module_name,
-                frame.f_code.co_name))
+        print("in %s()" % ".".join((module_name,
+                frame.f_code.co_name)), file=sys.stderr)
     else:
-        print
-    print >>sys.stderr, "\nExiting with failure"
+        print()
+    print("\nExiting with failure", file=sys.stderr)
     sys.exit(1)

@@ -20,6 +20,8 @@
 """List packages owning files
 """
 
+from __future__ import print_function
+
 import sys
 from optparse import OptionGroup
 
@@ -58,8 +60,8 @@ One of regex, fnmatch, simple, exact. Default: %default""")
 
     # Check if any positional arguments are specified
     if not args:
-        print >>sys.stderr, "Usage error: No package specified"
-        print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
+        print("Usage error: No package specified", file=sys.stderr)
+        print("Try %s --help" % parser.get_prog_name(), file=sys.stderr)
         sys.exit(1)
 
     return options, args
@@ -78,7 +80,7 @@ def main():
                 options.ignore_case, options.requested_instances)
 
         for package_id, content in content_generator:
-            print package_id, colourify_content(content)
+            print(package_id, colourify_content(content))
 
 if __name__ == '__main__':
     main()

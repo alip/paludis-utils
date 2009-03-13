@@ -20,6 +20,8 @@
 """Option parsing for paludis clients.
 """
 
+from __future__ import print_function
+
 import os
 import sys
 import re
@@ -321,5 +323,5 @@ sav|
         """Callback for --version"""
         version_str = self.get_prog_name() + ", part of " + version()
 
-        print version_str
+        print(version_str)
         sys.exit(0)

@@ -20,6 +20,8 @@
 """Calculate size of installed packages.
 """
 
+from __future__ import print_function
+
 import os
 import sys
 from optparse import OptionGroup
@@ -109,16 +111,16 @@ def pprint_contents(contents, root, divisor=1024.0, sum=False, sum_only=False):
         del stats[key]
 
     for key in stats:
-        print "%d %s," % (stats[key], key),
+        print("%d %s," % (stats[key], key), end=' ')
 
     size /= divisor
-    print "%.2f" % size,
+    print("%.2f" % size, end=' ')
     if divisor == SIZE_MEGABYTES:
-        print "MB"
+        print("MB")
     elif divisor == SIZE_KILOBYTES:
-        print "KB"
+        print("KB")
     else:
-        print "B"
+        print("B")
 
 def parse_command_line():
     """Parse command line options."""
@@ -161,8 +163,8 @@ This option can be passed more than once to match more repositories.""")
 
     # Check if any positional arguments are specified
     if not args:
-        print >>sys.stderr, "Usage error: No package specified"
-        print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
+        print("Usage error: No package specified", file=sys.stderr)
+        print("Try %s --help" % parser.get_prog_name(), file=sys.stderr)
         sys.exit(1)
 
     return options, args
@@ -180,12 +182,12 @@ def main():
                 options.fnpattern, options.regexp, options.ignore_case)
 
         for package_id, contents in content_generator:
-            print package_id.canonical_form(PackageIDCanonicalForm.FULL),
+            print(package_id.canonical_form(PackageIDCanonicalForm.FULL), end=' ')
             pprint_contents(contents, env.root, options.display_size,
                     options.sum, options.sum_only)
 
     if options.sum or options.sum_only:
-        print "Totals:",
+        print("Totals:", end=' ')
         pprint_contents(None, env.root, options.display_size, options.sum,
                 options.sum_only)
 

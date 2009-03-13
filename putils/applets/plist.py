@@ -20,6 +20,8 @@
 """List contents of packages matching requirements
 """
 
+from __future__ import print_function
+
 import os
 import sys
 from optparse import OptionGroup
@@ -67,8 +69,8 @@ This option can be passed more than once to match more repositories.""")
 
     # Check if any positional arguments are specified
     if not args:
-        print >>sys.stderr, "Usage error: No package specified"
-        print >>sys.stderr, "Try %s --help" % parser.get_prog_name()
+        print("Usage error: No package specified", file=sys.stderr)
+        print("Try %s --help" % parser.get_prog_name(), file=sys.stderr)
         sys.exit(1)
 
     return options, args
@@ -89,25 +91,25 @@ def main():
 
         for package_id, contents in content_generator:
             if options.colour:
-                print "\033[1;35m*\033[0m",
+                print("\033[1;35m*\033[0m", end=' ')
             else:
-                print "*",
-            print package_id.canonical_form(PackageIDCanonicalForm.FULL)
+                print("*", end=' ')
+            print(package_id.canonical_form(PackageIDCanonicalForm.FULL))
             for content in contents:
                 if options.root or env.root == os.path.sep:
-                    print colourify_content(content, env.root),
+                    print(colourify_content(content, env.root), end=' ')
                 else:
-                    print colourify_content(content, env.root),
+                    print(colourify_content(content, env.root), end=' ')
 
                 if options.print_symlink_target and hasattr(content, "target_key"):
-                    print "->",
+                    print("->", end=' ')
                     if options.root or env.root == os.path.sep:
-                        print colourify_content(content, env.root, target=True)
+                        print(colourify_content(content, env.root, target=True))
                     else:
-                        print colourify_content(content, env.root,
-                                target=True).replace(env.root, "")
+                        print(colourify_content(content, env.root,
+                                target=True).replace(env.root, ""))
                 else:
-                    print
+                    print()
 
 if __name__ == '__main__':
     main()

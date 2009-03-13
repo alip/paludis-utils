@@ -20,7 +20,7 @@
 """paludis-utils -- Useful utilities for paludis
 """
 
-from __future__ import generators
+from __future__ import generators, print_function
 
 import os
 import sys
@@ -57,10 +57,10 @@ def arrange_separator(string, sep=":"):
 
 def usage():
     """Print usage"""
-    print "Usage: p <applet> <args>"
-    print "Invoke a paludis-utils applet"
-    print
-    print "Currently defined applets:"
+    print("Usage: p <applet> <args>")
+    print("Invoke a paludis-utils applet")
+    print()
+    print("Currently defined applets:")
 
     import putils.applets
 
@@ -72,7 +72,7 @@ def usage():
         applet_usage += applet.usage.replace("%prog", applet_name).replace("\n", " : ")
         applet_usage += "\n"
 
-    print "\n".join(arrange_separator(applet_usage))
+    print("\n".join(arrange_separator(applet_usage)))
 
 def main():
     signal.signal(signal.SIGINT, exiting_signal_handler)
@@ -86,7 +86,7 @@ def main():
                 sys.exit(0)
             elif o in ("-V", "--version"):
                 from putils.getopt import version
-                print version()
+                print(version())
                 sys.exit(0)
 
         if not args:
@@ -100,8 +100,8 @@ def main():
 
     applet = get_applet(applet_name)
     if applet is None:
-        print >>sys.stderr, "Usage error: No such applet", applet_name
-        print >>sys.stderr, "Try p --help"
+        print("Usage error: No such applet", applet_name, file=sys.stderr)
+        print("Try p --help", file=sys.stderr)
         sys.exit(1)
 
     return applet.main()
