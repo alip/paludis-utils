@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
 #
-# Copyright (c) 2008 Ali Polatel <polatel@itu.edu.tr>
+# Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
 #
 # This file is part of the paludis-utils. paludis-utils is free software; you
 # can redistribute it and/or modify it under the terms of the GNU General
@@ -22,7 +22,7 @@
 
 __name__ = "paludis-utils"
 __version__ = "0.1"
-__author__ = "Ali Polatel <polatel@itu.edu.tr>"
+__author__ = "Ali Polatel <polatel@gmail.com>"
 __license__ = "GPL-2"
 __copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
         __name__ + " is free software, " +\
