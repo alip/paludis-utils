@@ -163,9 +163,7 @@ This option can be passed more than once to match more repositories.""")
 
     # Check if any positional arguments are specified
     if not args:
-        print("Usage error: No package specified", file=sys.stderr)
-        print("Try %s --help" % parser.get_prog_name(), file=sys.stderr)
-        sys.exit(1)
+        parser.error("No package specified")
 
     return options, args
 
