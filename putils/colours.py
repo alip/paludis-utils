@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=indent :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
 #
@@ -49,7 +49,7 @@ lscolours_keys = ( "tw", "ow", "st", "su", "sg", "or", "ln", "pi", "so", "do",
         "bd", "cd", "di", "ex", "fi", "mi", "no" )
 
 @cache_return
-def parse_ls_colours(): #{{{
+def parse_ls_colours():
     """Convert LS_COLORS into two dictionaries,
     One has wildcards and associated colour codes,
     the other has special codes and associated colour codes,"""
@@ -71,10 +71,9 @@ def parse_ls_colours(): #{{{
             codes[key] = colour_code
 
     return codes, special_codes
-#}}}
 
 @cache_return
-def translate(wildcards, flags=0): #{{{
+def translate(wildcards, flags=0):
     """Translate a group of wildcards into a compiled regex"""
     regex = "("
 
@@ -89,7 +88,6 @@ def translate(wildcards, flags=0): #{{{
     regex += ")"
 
     return re.compile(regex, flags)
-#}}}
 
 def colourify_file(filename, colour_codes, special_codes):
     """Colourify given filename."""
@@ -171,4 +169,3 @@ def no_colourify_content(content, root="", target=False):
                     dname + os.path.sep, '')
     else:
         return content_name
-

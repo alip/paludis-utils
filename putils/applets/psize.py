@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=indent :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
 #
@@ -37,7 +37,7 @@ __all__ = [ "main", "usage" ]
 usage = """%prog [options] <pkgname>
 Calculate size of installed packages"""
 
-#{{{Globals
+# Globals
 SIZE_MEGABYTES = float(1024 * 1024)
 SIZE_KILOBYTES = float(1024)
 SIZE_BYTES = float(1)
@@ -50,9 +50,8 @@ _total_stats = { "devices" : 0,
         "symlinks" : 0,
         "unknown" : 0 }
 _total_size = 0
-#}}}
 
-def content_stat(contents, root, sum=False): #{{{
+def content_stat(contents, root, sum=False):
     """Return a statistics of contents."""
 
     stats = { "directories" : 0,
@@ -88,9 +87,8 @@ def content_stat(contents, root, sum=False): #{{{
         _total_size += size
 
     return size, stats
-#}}}
 
-def pprint_contents(contents, root, divisor=1024.0, sum=False, sum_only=False): #{{{
+def pprint_contents(contents, root, divisor=1024.0, sum=False, sum_only=False):
     """Pretty print package contents."""
 
     if contents is None:
@@ -121,9 +119,8 @@ def pprint_contents(contents, root, divisor=1024.0, sum=False, sum_only=False): 
         print "KB"
     else:
         print "B"
-#}}}
 
-def parse_command_line(): #{{{
+def parse_command_line():
     """Parse command line options."""
 
     parser = PaludisOptionParser()
@@ -150,14 +147,13 @@ def parse_command_line(): #{{{
 
     parser.add_default_content_limit_options()
 
-    #{{{Matching by repository
+    # Matching by repository
     option_group_repo = OptionGroup(parser, "Matching by repository")
     option_group_repo.add_option("-R", "--repository", action = "append",
             dest = "source_repos", default=list(), metavar="REPO",
             help = """Match packages by source repository.
 This option can be passed more than once to match more repositories.""")
     parser.add_option_group(option_group_repo)
-    #}}}
 
     parser.add_default_query_options()
 
@@ -170,9 +166,8 @@ This option can be passed more than once to match more repositories.""")
         sys.exit(1)
 
     return options, args
-#}}}
 
-def main(): #{{{
+def main():
     options, args = parse_command_line()
     env = EnvironmentFactory.instance.create(options.environment)
 
@@ -193,8 +188,6 @@ def main(): #{{{
         print "Totals:",
         pprint_contents(None, env.root, options.display_size, options.sum,
                 options.sum_only)
-#}}}
 
 if __name__ == '__main__':
     main()
-

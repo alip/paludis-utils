@@ -30,7 +30,6 @@ from paludis import (Filter, Generator, Log, LogLevel, LogContext,
         MatchPackageOptions, Selection, VersionSpec, UserPackageDepSpecOption,
         QualifiedPackageNameError, parse_user_package_dep_spec)
 
-from putils.compat import any
 from putils.util import rootjoin
 
 __all__ = [ "get_contents", "search_contents" ]

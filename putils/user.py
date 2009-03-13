@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 :
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=indent :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
 #
@@ -44,4 +44,3 @@ else:
         Log.instance.message("user_file.invalid", LogLevel.WARNING,
                 LogContext.NO_CONTEXT,
                 "User customization file constains error: %s" % e.message)
-

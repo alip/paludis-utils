@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=indent :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
 #
@@ -33,7 +33,7 @@ __all__ = [ "main", "usage" ]
 usage = """%prog [options] <filename>
 List packages owning files"""
 
-def parse_command_line(): #{{{
+def parse_command_line():
     """Parse command line options."""
 
     parser = PaludisOptionParser()
@@ -63,9 +63,8 @@ One of regex, fnmatch, simple, exact. Default: %default""")
         sys.exit(1)
 
     return options, args
-#}}}
 
-def main(): #{{{
+def main():
     options, args = parse_command_line()
     env = EnvironmentFactory.instance.create(options.environment)
 
@@ -80,8 +79,6 @@ def main(): #{{{
 
         for package_id, content in content_generator:
             print package_id, colourify_content(content)
-#}}}
 
 if __name__ == '__main__':
     main()
-

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 :
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=indent :
 #
 # Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
 #
@@ -39,4 +39,3 @@ def rootjoin(path, root):
         return root + path
     else:
         return root + os.path.sep + path
-
