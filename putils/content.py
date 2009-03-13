@@ -17,7 +17,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 # Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""Package related functions
+"""Package content related functions
 """
 
 from __future__ import generators
