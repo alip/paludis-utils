@@ -28,7 +28,7 @@ from paludis import (EnvironmentFactory, PackageIDCanonicalForm,
         Log, LogLevel, LogContext)
 
 from putils.getopt import PaludisOptionParser
-from putils.packages import get_contents
+from putils.content import get_contents
 
 __all__ = [ "main", "usage" ]
 

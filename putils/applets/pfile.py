@@ -26,7 +26,7 @@ from optparse import OptionGroup
 from paludis import EnvironmentFactory
 
 from putils.getopt import PaludisOptionParser
-from putils.packages import search_contents
+from putils.content import search_contents
 
 __all__ = [ "main", "usage" ]
 

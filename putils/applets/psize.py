@@ -30,7 +30,7 @@ from paludis import (ContentsDirEntry, ContentsFileEntry,
         EnvironmentFactory, PackageIDCanonicalForm)
 
 from putils.getopt import PaludisOptionParser
-from putils.packages import get_contents
+from putils.content import get_contents
 
 __all__ = [ "main", "usage" ]
 

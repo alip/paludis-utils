@@ -29,6 +29,6 @@ __copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
         "and you are welcome to redistribute it under the terms of " +\
         "the GNU General Public License, version 2."
 
-__all__ = [ "applets", "colours", "common", "compat", "getopt", "packages",
+__all__ = [ "applets", "colours", "common", "compat", "getopt", "content",
         "user", "util" ]
 
