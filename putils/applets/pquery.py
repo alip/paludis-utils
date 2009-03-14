@@ -34,6 +34,14 @@ __all__ = [ "main", "usage" ]
 usage = """%prog [options] <pkgname>
 Query for package updates using REMOTE_IDS"""
 
+ESC    = "\033["
+NORM   = ESC + "0m"
+PINK   = ESC + "1;35m"
+GREEN  = ESC + "0;32m"
+RED    = ESC + "1;31m"
+BROWN  = ESC + "0;33m"
+YELLOW = ESC + "1;33m"
+
 def parse_command_line():
     """Parse command line options."""
 
@@ -59,6 +67,11 @@ def main():
     options, args = parse_command_line()
     env = EnvironmentFactory.instance.create(options.environment)
 
+    if options.colour:
+        global NORM, PINK, GREEN, RED, BROWN, YELLOW
+    else:
+        NORM = PINK = GREEN = RED = BROWN = YELLOW = ""
+
     for package in args:
         for name, version, mkey in get_ids(env, package, options.include_masked):
             for value in mkey:
@@ -74,26 +87,17 @@ def main():
                 if version_new is None:
                     continue
                 elif version_new > version:
-                    if options.colour:
-                        print("\033[1;35mN\033[0m", end=' ')
-                    else:
-                        print("N", end=' ')
-                    print("%s-%s < %s-%s (%s)" % (name, version,
-                            name, version_new, value))
+                    print(PINK + "N" + NORM, end=' ')
+                    print("%s-{%s%s < %s%s} %s%s%s" % (name, PINK, version,
+                            version_new, NORM, BROWN, value, NORM))
                 elif version_new == version:
-                    if options.colour:
-                        print("\033[0;32mE\033[0m", end=' ')
-                    else:
-                        print("E", end=' ')
-                    print("%s-%s = %s-%s (%s)" % (name, version,
-                            name, version_new, value))
+                    print(GREEN + "E" + NORM, end=' ')
+                    print("%s-{%s%s = %s%s} %s%s%s" % (name, GREEN, version,
+                            version_new, NORM, BROWN, value, NORM))
                 else:
-                    if options.colour:
-                        print("\033[1;31mO\033[0m", end=' ')
-                    else:
-                        print("O", end=' ')
-                    print("%s-%s > %s-%s (%s)" % (name, version,
-                            name, version_new, value))
+                    print(RED + "O" + NORM, end=' ')
+                    print("%s-{%s%s > %s%s} %s%s%s" % (name, RED, version,
+                            version_new, NORM, BROWN, value, NORM))
 
 if __name__ == '__main__':
     main()
