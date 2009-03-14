@@ -23,6 +23,7 @@
 from __future__ import print_function
 
 from sys import stderr
+from optparse import OptionGroup
 from paludis import EnvironmentFactory, Log, LogContext, LogLevel
 
 from putils.getopt import PaludisOptionParser
@@ -38,7 +39,14 @@ def parse_command_line():
 
     parser = PaludisOptionParser()
     parser.usage = usage.replace("<pkgname>", "<pkgname>...")
+
     parser.add_default_format_options()
+    fgroup = OptionGroup(parser, "Filtering Options")
+    fgroup.add_option("-i", "--include-masked", action = "store_true", dest =
+        "include_masked",
+        help = "Include masked packages")
+    parser.add_option_group(fgroup)
+
     options, args = parser.parse_args()
 
     # Check if any positional arguments are specified
@@ -52,7 +60,7 @@ def main():
     env = EnvironmentFactory.instance.create(options.environment)
 
     for package in args:
-        remote_ids = get_ids(env, package)
+        remote_ids = get_ids(env, package, options.include_masked)
         for name, version, mkey in remote_ids:
             for value in mkey:
                 remote, id = str(value).split(":")

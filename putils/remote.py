@@ -32,11 +32,16 @@ from paludis import (Log, LogContext, LogLevel)
 
 __all__ = [ "get_ids", "get_handler" ]
 
-def get_ids(env, package):
+def get_ids(env, package, include_masked):
+    if include_masked:
+        pfilter = Filter.All()
+    else:
+        pfilter = Filter.NotMasked()
+
     pds = parse_user_package_dep_spec(package, env,
-            [UserPackageDepSpecOption.ALLOW_WILDCARDS], Filter.All())
+            [UserPackageDepSpecOption.ALLOW_WILDCARDS], pfilter)
     pids = env[Selection.BestVersionOnly(
-        Generator.Matches(pds, MatchPackageOptions()) | Filter.All()
+        Generator.Matches(pds, MatchPackageOptions()) | pfilter
         )]
     rids = []
     for pid in pids:
