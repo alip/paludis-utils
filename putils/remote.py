@@ -25,6 +25,7 @@ from __future__ import with_statement
 import re
 from urllib import urlretrieve
 from xml.etree.cElementTree import iterparse
+from subprocess import Popen, PIPE
 
 from paludis import (Filter, Generator, Selection, MatchPackageOptions,
         UserPackageDepSpecOption, VersionSpec, parse_user_package_dep_spec)
@@ -33,6 +34,7 @@ from paludis import (Log, LogContext, LogLevel)
 __all__ = [ "get_ids", "get_handler" ]
 
 VIM_VERSION = re.compile("<td class=\"rowodd\" valign=\"top\" nowrap><b>(.*?)</b></td>")
+GEM_VERSION = re.compile("\((.*?)\)")
 
 def get_ids(env, package, include_masked):
     if include_masked:
@@ -66,6 +68,8 @@ def get_handler(remote):
         return cpan
     elif remote == "vim":
         return vim
+    elif remote == "rubyforge":
+        return rubyforge
     else:
         return None
 
@@ -162,6 +166,37 @@ def vim(id):
         Log.instance.message("vim.no_version",
                 LogLevel.WARNING, LogContext.NO_CONTEXT,
                 "vim.org has no latest version information for id '%s'" % id)
+        return None
+    else:
+        return version_new
+
+def rubyforge(id):
+    version_new = None
+    gem = Popen(["gem", "search", id, "--remote"], stdout = PIPE, stderr = PIPE)
+    out, err = gem.communicate()
+    ret = gem.wait()
+    if 0 != ret:
+        Log.instance.message("rubyforge.exec_gem",
+                LogLevel.WARNING, LogContext.NO_CONTEXT,
+                "gem search returned non-zero: %s" % err)
+        return None
+    for line in out.splitlines():
+        if line.startswith(id):
+            m = GEM_VERSION.search(line)
+            if m is not None:
+                try:
+                    version_new = VersionSpec(m.groups()[0])
+                    break
+                except:
+                    Log.instance.message("rubyforge.bad_version",
+                            LogLevel.WARNING, LogContext.NO_CONTEXT,
+                            "rubyforge has bad version for id '%s': '%s'" % (id,
+                                m.groups()[0]))
+                    return None
+    if version_new is None:
+        Log.instance.message("rubyforge.no_version",
+                LogLevel.WARNING, LogContext.NO_CONTEXT,
+                "rubyforge has no latest version information for id '%s'" % id)
         return None
     else:
         return version_new
