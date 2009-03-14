@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
+# vim: set sw=4 ts=4 sts=4 et tw=80 fdm=indent :
 #
-# Copyright (c) 2008 Ali Polatel <polatel@gmail.com>
+# Copyright (c) 2008, 2009 Ali Polatel <polatel@gmail.com>
 #
 # This file is part of the paludis-utils. paludis-utils is free software; you
 # can redistribute it and/or modify it under the terms of the GNU General
@@ -29,5 +29,6 @@ __copyright__ = __name__ + " comes with ABSOLUTELY NO WARRANTY. " +\
         "and you are welcome to redistribute it under the terms of " +\
         "the GNU General Public License, version 2."
 
-__all__ = [ "applets", "colours", "common", "getopt", "content", "user", "util" ]
+__all__ = [ "applets", "colours", "common", "getopt", "content", "remote",
+        "user", "util" ]
 
