@@ -62,6 +62,8 @@ def get_handler(remote):
         return freshmeat
     elif remote == "pypi":
         return pypi
+    elif remote == "cpan":
+        return cpan
     elif remote == "vim":
         return vim
     else:
@@ -110,6 +112,33 @@ def pypi(id):
         Log.instance.message("pypi.no_version",
                 LogLevel.WARNING, LogContext.NO_CONTEXT,
                 "pypi has no latest version information for id '%s'" % id)
+        return None
+    else:
+        return version_new
+
+def cpan(id):
+    version_new = None
+    uri = "http://search.cpan.org/search?mode=module&format=xml&query=%s" % id
+    filename, headers = urlretrieve(uri)
+    with open(filename, "r") as f:
+        seen_id = False
+        for event, elem in iterparse(f):
+            if elem.tag == "name" and elem.text == id:
+                seen_id = True
+            if seen_id and elem.tag == "version":
+                try:
+                    version_new = VersionSpec(elem.text)
+                    break
+                except:
+                    Log.instance.message("cpan.bad_version",
+                            LogLevel.WARNING, LogContext.NO_CONTEXT,
+                            "cpan has bad version for id '%s': '%s'" % (id,
+                            elem.text))
+                    return None
+    if version_new is None:
+        Log.instance.message("cpan.no_version",
+                LogLevel.WARNING, LogContext.NO_CONTEXT,
+                "cpan has no latest version information for id '%s'" % id)
         return None
     else:
         return version_new

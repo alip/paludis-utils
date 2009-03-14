@@ -63,7 +63,7 @@ def main():
         remote_ids = get_ids(env, package, options.include_masked)
         for name, version, mkey in remote_ids:
             for value in mkey:
-                remote, id = str(value).split(":")
+                remote, id = str(value).split(":", 1)
                 handler = get_handler(remote)
                 if handler is None:
                     Log.instance.message("remote.no_handler", LogLevel.WARNING,
