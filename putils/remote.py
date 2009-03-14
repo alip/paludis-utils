@@ -22,6 +22,7 @@
 
 from __future__ import with_statement
 
+import re
 from urllib import urlretrieve
 from xml.etree.cElementTree import iterparse
 
@@ -30,6 +31,8 @@ from paludis import (Filter, Generator, Selection, MatchPackageOptions,
 from paludis import (Log, LogContext, LogLevel)
 
 __all__ = [ "get_ids", "get_handler" ]
+
+VIM_VERSION = re.compile("<td class=\"rowodd\" valign=\"top\" nowrap><b>(.*?)</b></td>")
 
 def get_ids(env, package, include_masked):
     if include_masked:
@@ -59,6 +62,8 @@ def get_handler(remote):
         return freshmeat
     elif remote == "pypi":
         return pypi
+    elif remote == "vim":
+        return vim
     else:
         return None
 
@@ -72,16 +77,16 @@ def freshmeat(id):
                 try:
                     version_new = VersionSpec(elem.text)
                     break
-                except Exception as err:
+                except:
                     Log.instance.message("freshmeat.bad_version",
                             LogLevel.WARNING, LogContext.NO_CONTEXT,
-                            "Freshmeat has bad version for id '%s': '%s'" % (id,
+                            "freshmeat has bad version for id '%s': '%s'" % (id,
                                 elem.text))
                     return None
     if version_new is None:
         Log.instance.message("freshmeat.no_version",
                 LogLevel.WARNING, LogContext.NO_CONTEXT,
-                "Freshmeat has no latest version information for id '%s'" % id)
+                "freshmeat has no latest version information for id '%s'" % id)
         return None
     else:
         return version_new
@@ -95,16 +100,39 @@ def pypi(id):
             if elem.tag.endswith("revision"):
                 try:
                     version_new = VersionSpec(elem.text)
-                except Exception as err:
+                except:
                     Log.instance.message("pypi.bad_version",
                             LogLevel.WARNING, LogContext.NO_CONTEXT,
-                            "Pypi has bad version for id '%s': '%s'" % (id,
+                            "pypi has bad version for id '%s': '%s'" % (id,
                             elem.text))
                     return None
     if version_new is None:
         Log.instance.message("pypi.no_version",
                 LogLevel.WARNING, LogContext.NO_CONTEXT,
-                "Pypi has no latest version information for id '%s'" % id)
+                "pypi has no latest version information for id '%s'" % id)
+        return None
+    else:
+        return version_new
+
+def vim(id):
+    version_new = None
+    uri = "http://www.vim.org/scripts/script.php?script_id=%s" % id
+    filename, headers = urlretrieve(uri)
+    with open(filename, "r") as f:
+        m = VIM_VERSION.search(f.read())
+        if m is not None:
+            try:
+                version_new = VersionSpec(m.groups()[0])
+            except:
+                Log.instance.message("vim.bad_version",
+                        LogLevel.WARNING, LogContext.NO_CONTEXT,
+                        "vim.org has bad version for id '%s': '%s'" % (id,
+                        m.groups()[0]))
+                return None
+    if version_new is None:
+        Log.instance.message("vim.no_version",
+                LogLevel.WARNING, LogContext.NO_CONTEXT,
+                "vim.org has no latest version information for id '%s'" % id)
         return None
     else:
         return version_new
