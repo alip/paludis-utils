@@ -72,27 +72,29 @@ def main():
                     continue
 
                 version_new = handler(id)
-                if version_new > version:
+                if version_new is None:
+                    continue
+                elif version_new > version:
                     if options.colour:
                         print("\033[1;35mN\033[0m", end=' ')
                     else:
                         print("N", end=' ')
-                    print("%s-%s < %s-%s" % (str(name), str(version),
-                            str(name), str(version_new)))
+                    print("%s-%s < %s-%s (%s)" % (name, version,
+                            name, version_new, value))
                 elif version_new == version:
                     if options.colour:
                         print("\033[0;32mE\033[0m", end=' ')
                     else:
                         print("E", end=' ')
-                    print("%s-%s = %s-%s" % (str(name), str(version),
-                            str(name), str(version_new)))
+                    print("%s-%s = %s-%s (%s)" % (name, version,
+                            name, version_new, value))
                 else:
                     if options.colour:
                         print("\033[1;31mO\033[0m", end=' ')
                     else:
                         print("O", end=' ')
-                    print("%s-%s > %s-%s" % (str(name), str(version),
-                            str(name), str(version_new)))
+                    print("%s-%s > %s-%s (%s)" % (name, version,
+                            name, version_new, value))
 
 if __name__ == '__main__':
     main()

@@ -26,8 +26,7 @@ from urllib import urlretrieve
 from xml.etree.cElementTree import iterparse
 
 from paludis import (Filter, Generator, Selection, MatchPackageOptions,
-        UserPackageDepSpecOption, parse_user_package_dep_spec)
-from paludis import (VersionSpec, BadVersionSpecError)
+        UserPackageDepSpecOption, VersionSpec, parse_user_package_dep_spec)
 from paludis import (Log, LogContext, LogLevel)
 
 __all__ = [ "get_ids", "get_handler" ]
@@ -58,6 +57,8 @@ def get_ids(env, package, include_masked):
 def get_handler(remote):
     if remote == "freshmeat":
         return freshmeat
+    elif remote == "pypi":
+        return pypi
     else:
         return None
 
@@ -71,10 +72,11 @@ def freshmeat(id):
                 try:
                     version_new = VersionSpec(elem.text)
                     break
-                except BadVersionSpecError as err:
+                except Exception as err:
                     Log.instance.message("freshmeat.bad_version",
                             LogLevel.WARNING, LogContext.NO_CONTEXT,
-                            "Freshmeat has bad version for id '%s': %s" % id, err.message)
+                            "Freshmeat has bad version for id '%s': '%s'" % (id,
+                                elem.text))
                     return None
     if version_new is None:
         Log.instance.message("freshmeat.no_version",
@@ -83,3 +85,27 @@ def freshmeat(id):
         return None
     else:
         return version_new
+
+def pypi(id):
+    version_new = None
+    uri = "http://pypi.python.org/pypi?:action=doap&name=%s" % id
+    filename, headers = urlretrieve(uri)
+    with open(filename, "r") as f:
+        for event, elem in iterparse(f):
+            if elem.tag.endswith("revision"):
+                try:
+                    version_new = VersionSpec(elem.text)
+                except Exception as err:
+                    Log.instance.message("pypi.bad_version",
+                            LogLevel.WARNING, LogContext.NO_CONTEXT,
+                            "Pypi has bad version for id '%s': '%s'" % (id,
+                            elem.text))
+                    return None
+    if version_new is None:
+        Log.instance.message("pypi.no_version",
+                LogLevel.WARNING, LogContext.NO_CONTEXT,
+                "Pypi has no latest version information for id '%s'" % id)
+        return None
+    else:
+        return version_new
+
