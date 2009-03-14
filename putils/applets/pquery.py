@@ -60,8 +60,7 @@ def main():
     env = EnvironmentFactory.instance.create(options.environment)
 
     for package in args:
-        remote_ids = get_ids(env, package, options.include_masked)
-        for name, version, mkey in remote_ids:
+        for name, version, mkey in get_ids(env, package, options.include_masked):
             for value in mkey:
                 remote, id = str(value).split(":", 1)
                 handler = get_handler(remote)

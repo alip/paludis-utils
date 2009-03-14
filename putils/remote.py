@@ -20,7 +20,7 @@
 """REMOTE_IDS support
 """
 
-from __future__ import with_statement
+from __future__ import generators, with_statement
 
 import re
 from urllib import urlretrieve
@@ -47,17 +47,15 @@ def get_ids(env, package, include_masked):
     pids = env[Selection.BestVersionOnly(
         Generator.Matches(pds, MatchPackageOptions()) | pfilter
         )]
-    rids = []
     for pid in pids:
         mkey = pid.find_metadata("REMOTE_IDS")
         if mkey is not None:
             values = mkey.value()
-            rids.append((pid.name, pid.version, values))
+            yield pid.name, pid.version, values
         else:
             Log.instance.message("e.no_remote_ids", LogLevel.WARNING,
                     LogContext.NO_CONTEXT,
-                    "'%s' does not have a remote ids metadata key" % pid.name)
-    return rids
+                    "%s does not have a remote ids metadata key" % pid.name)
 
 def get_handler(remote):
     if remote == "freshmeat":
