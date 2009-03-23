@@ -71,6 +71,19 @@ def get_handler(remote):
     else:
         return None
 
+def tryparse(f, id):
+    """iterparse() with error handling"""
+    gen = iter(iterparse(f))
+
+    while True:
+        try:
+            yield gen.next()
+        except Exception as err:
+            Log.instance.message("iterparse.xml_error",
+                    LogLevel.WARNING, LogContext.NO_CONTEXT,
+                    "Failed to parse xml for id %s: %s" % (id, str(err)))
+            break
+
 def freshmeat(id):
     version_new = None
     uri = "http://freshmeat.net/projects-xml/%s/%s.xml" % (id, id)
@@ -83,7 +96,7 @@ def freshmeat(id):
                     str(err)))
         return None
     with open(filename, "r") as f:
-        for event, elem in iterparse(f):
+        for event, elem in tryparse(f, id):
             if elem.tag == "latest_release_version":
                 try:
                     version_new = VersionSpec(elem.text)
@@ -114,7 +127,7 @@ def pypi(id):
                     str(err)))
         return None
     with open(filename, "r") as f:
-        for event, elem in iterparse(f):
+        for event, elem in tryparse(f, id):
             if elem.tag.endswith("revision"):
                 try:
                     version_new = VersionSpec(elem.text)
@@ -145,7 +158,7 @@ def cpan(id):
         return None
     with open(filename, "r") as f:
         seen_id = False
-        for event, elem in iterparse(f):
+        for event, elem in tryparse(f, id):
             if elem.tag == "name" and elem.text == id:
                 seen_id = True
             if seen_id and elem.tag == "version":
