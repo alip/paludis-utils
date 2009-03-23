@@ -61,6 +61,7 @@ def _get_module_name(path):
             module_name = path.replace(basename,
                     inspect.getmodulename(basename))
             module_name = module_name.replace(os.path.sep, ".")
+            break
     return module_name
 
 def exiting_signal_handler(signum, frame):
