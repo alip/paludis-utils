@@ -20,9 +20,11 @@
 """Common utilities
 """
 
-__all__ = [ "rootjoin", ]
+__all__ = [ "rootjoin", "setup_pager" ]
 
 import os
+import sys
+from subprocess import Popen, PIPE
 
 def rootjoin(path, root):
     """Smartly join path and root so there's no more than one / between them."""
@@ -39,3 +41,20 @@ def rootjoin(path, root):
         return root + path
     else:
         return root + os.path.sep + path
+
+def setup_pager():
+    """Setup pager to pipe output."""
+    if not sys.stdout.isatty():
+        # Not a tty, do nothing
+        return None, sys.stdout
+
+    if "PUTILS_PAGER" in os.environ:
+        pager = os.environ["PUTILS_PAGER"]
+    elif "PAGER" in os.environ:
+        pager = os.environ["PAGER"]
+    else:
+        pager = "less"
+
+    proc = Popen(pager, stdin = PIPE, stdout = sys.stdout, stderr = sys.stderr)
+    return proc, proc.stdin
+

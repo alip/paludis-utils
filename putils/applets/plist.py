@@ -31,6 +31,7 @@ from paludis import (EnvironmentFactory, PackageIDCanonicalForm,
 
 from putils.getopt import PaludisOptionParser
 from putils.content import get_contents
+from putils.util import setup_pager
 
 __all__ = [ "main", "usage" ]
 
@@ -76,8 +77,9 @@ This option can be passed more than once to match more repositories.""")
 def main():
     options, args = parse_command_line()
     env = EnvironmentFactory.instance.create(options.environment)
+    proc, outfd = setup_pager()
 
-    if options.colour:
+    if proc is not None and options.colour:
         from putils.colours import colourify_content
     else:
         from putils.colours import no_colourify_content as colourify_content
@@ -88,26 +90,35 @@ def main():
                 options.fnpattern, options.regexp, options.ignore_case)
 
         for package_id, contents in content_generator:
-            if options.colour:
-                print("\033[1;35m*\033[0m", end=' ')
+            if proc is not None and options.colour:
+                print("\033[1;35m*\033[0m", end=' ', file=outfd)
             else:
-                print("*", end=' ')
-            print(package_id.canonical_form(PackageIDCanonicalForm.FULL))
+                print("*", end=' ', file=outfd)
+            print(package_id.canonical_form(PackageIDCanonicalForm.FULL),
+                    file=outfd)
             for content in contents:
                 if options.root or env.root == os.path.sep:
-                    print(colourify_content(content, env.root), end=' ')
+                    print(colourify_content(content, env.root), end='',
+                            file=outfd)
                 else:
-                    print(colourify_content(content, env.root), end=' ')
+                    print(colourify_content(content, env.root), end='',
+                            file=outfd)
 
                 if options.print_symlink_target and hasattr(content, "target_key"):
-                    print("->", end=' ')
+                    print(" ->", end=' ', file=outfd)
                     if options.root or env.root == os.path.sep:
-                        print(colourify_content(content, env.root, target=True))
+                        print(colourify_content(content, env.root, target=True),
+                                file=outfd)
                     else:
                         print(colourify_content(content, env.root,
-                                target=True).replace(env.root, ""))
+                                target=True).replace(env.root, ""), file=outfd)
                 else:
-                    print()
+                    print(file=outfd)
+
+    if proc is not None:
+        outfd.close()
+        return proc.wait()
 
 if __name__ == '__main__':
     main()
+

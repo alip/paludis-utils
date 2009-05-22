@@ -29,6 +29,7 @@ from paludis import EnvironmentFactory
 
 from putils.getopt import PaludisOptionParser
 from putils.content import search_contents
+from putils.util import setup_pager
 
 __all__ = [ "main", "usage" ]
 
@@ -67,8 +68,9 @@ One of regex, fnmatch, simple, exact. Default: %default""")
 def main():
     options, args = parse_command_line()
     env = EnvironmentFactory.instance.create(options.environment)
+    proc, outfd = setup_pager()
 
-    if options.colour:
+    if proc is not None and options.colour:
         from putils.colours import colourify_content
     else:
         from putils.colours import no_colourify_content as colourify_content
@@ -78,7 +80,12 @@ def main():
                 options.ignore_case, options.requested_instances)
 
         for package_id, content in content_generator:
-            print(package_id, colourify_content(content))
+            print(package_id, colourify_content(content), file=outfd)
+
+    if proc is not None:
+        outfd.close()
+        return proc.wait()
 
 if __name__ == '__main__':
     main()
+

@@ -28,6 +28,7 @@ from paludis import EnvironmentFactory, Log, LogContext, LogLevel
 
 from putils.getopt import PaludisOptionParser
 from putils.remote import get_ids, get_handler
+from putils.util import setup_pager
 
 __all__ = [ "main", "usage" ]
 
@@ -66,8 +67,9 @@ def parse_command_line():
 def main():
     options, args = parse_command_line()
     env = EnvironmentFactory.instance.create(options.environment)
+    proc, outfd = setup_pager()
 
-    if options.colour:
+    if proc is not None and options.colour:
         global NORM, PINK, GREEN, RED, BROWN, YELLOW
     else:
         NORM = PINK = GREEN = RED = BROWN = YELLOW = ""
@@ -87,17 +89,21 @@ def main():
                 if version_new is None:
                     continue
                 elif version_new > version:
-                    print(PINK + "N" + NORM, end=' ')
+                    print(PINK + "N" + NORM, end=' ', file=outfd)
                     print("%s-{%s%s < %s%s} %s%s%s" % (name, PINK, version,
-                            version_new, NORM, BROWN, value, NORM))
+                            version_new, NORM, BROWN, value, NORM), file=outfd)
                 elif version_new == version:
-                    print(GREEN + "E" + NORM, end=' ')
+                    print(GREEN + "E" + NORM, end=' ', file=outfd)
                     print("%s-{%s%s = %s%s} %s%s%s" % (name, GREEN, version,
-                            version_new, NORM, BROWN, value, NORM))
+                            version_new, NORM, BROWN, value, NORM), file=outfd)
                 else:
                     print(RED + "O" + NORM, end=' ')
                     print("%s-{%s%s > %s%s} %s%s%s" % (name, RED, version,
-                            version_new, NORM, BROWN, value, NORM))
+                            version_new, NORM, BROWN, value, NORM), file=outfd)
+
+    if proc is not None:
+        outfd.close()
+        return proc.wait()
 
 if __name__ == '__main__':
     main()
