@@ -74,7 +74,7 @@ def content_stat(contents, root, sum=False):
             else:
                 Log.instance.message("content.non_existant_file",
                         LogLevel.WARNING, LogContext.NO_CONTEXT,
-                        "File \"%s\" doesn't exit!" % c_path)
+                        "File \"%s\" doesn't exist!" % c_path)
         elif isinstance(c, ContentsSymEntry):
             stats["symlinks"] += 1
         elif isinstance(c, ContentsOtherEntry):
