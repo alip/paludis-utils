@@ -77,7 +77,14 @@ def main():
     for package in args:
         for name, version, mkey in get_ids(env, package, options.include_masked):
             for value in mkey:
-                remote, id = str(value).split(":", 1)
+                try:
+                    remote, id = str(value).split(":", 1)
+                except ValueError:
+                    Log.instance.message("remote.invalid", LogLevel.WARNING,
+                            LogContext.NO_CONTEXT,
+                            "Invalid REMOTE_IDS key `%s' in package %s-%s" %
+                            (str(value), name, version))
+                    continue
                 handler = get_handler(remote)
                 if handler is None:
                     Log.instance.message("remote.no_handler", LogLevel.WARNING,
