@@ -147,7 +147,7 @@ def pypi(id):
 
 def cpan(id):
     version_new = None
-    uri = "http://search.cpan.org/search?mode=module&format=xml&query=%s" % id
+    uri = "http://search.cpan.org/search?mode=dist&format=xml&query=%s" % id
     try:
         filename, headers = urlretrieve(uri)
     except Exception as err:
