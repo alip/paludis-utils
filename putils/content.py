@@ -49,7 +49,7 @@ def get_contents(package, env, source_repos = [],
     #}}}
 
     #{{{Get PackageDepSpec
-    filter_installed = Filter.SupportsInstalledAction()
+    filter_installed = Filter.InstalledAtRoot(env.root)
     allow_wildcards = UserPackageDepSpecOption.ALLOW_WILDCARDS
     package_dep_spec = parse_user_package_dep_spec(package, env,
             [allow_wildcards], filter_installed)
@@ -107,7 +107,7 @@ def search_contents(path, env, matcher="exact", ignore_case=False, #{{{
 
     # Get package ids of all installed packages
     ids = env[Selection.AllVersionsGroupedBySlot(
-        Generator.Matches.All() | Filter.SupportsInstalledAction()
+        Generator.Matches.All() | Filter.InstalledAtRoot(env.root)
         )]
 
     if matcher == "fnmatch":
