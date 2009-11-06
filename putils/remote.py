@@ -122,7 +122,7 @@ def freshmeat(id, auth_data=None):
         versions.sort(reverse=True)
         return versions[0]
 
-def pypi(id):
+def pypi(id, auth_data=None):
     version_new = None
     uri = "http://pypi.python.org/pypi?:action=doap&name=%s" % id
     try:
@@ -152,7 +152,7 @@ def pypi(id):
     else:
         return version_new
 
-def cpan(id):
+def cpan(id, auth_data=None):
     version_new = None
     uri = "http://search.cpan.org/search?mode=dist&format=xml&query=%s" % id
     try:
@@ -186,7 +186,7 @@ def cpan(id):
     else:
         return version_new
 
-def vim(id):
+def vim(id, auth_data=None):
     version_new = None
     uri = "http://www.vim.org/scripts/script.php?script_id=%s" % id
     try:
@@ -216,7 +216,7 @@ def vim(id):
     else:
         return version_new
 
-def rubyforge(id):
+def rubyforge(id, auth_data=None):
     version_new = None
     gem = Popen(["gem", "search", id, "--remote"], stdout = PIPE, stderr = PIPE)
     out, err = gem.communicate()
