@@ -84,9 +84,16 @@ def tryparse(f, id):
                     "Failed to parse xml for id %s: %s" % (id, str(err)))
             break
 
-def freshmeat(id):
-    version_new = None
-    uri = "http://freshmeat.net/projects-xml/%s/%s.xml" % (id, id)
+def freshmeat(id, auth_data=None):
+    versions = []
+    try:
+        uri = "http://freshmeat.net/projects/%s/releases.xml?auth_code=%s" % (id,
+                auth_data['freshmeat_auth_code'])
+    except:
+        Log.instance.message("freshmeat.missing_auth_data",
+                LogLevel.WARNING, LogContext.NO_CONTEXT,
+                "freshmeat ids require freshmeat_auth_code=foo in --auth-data string")
+        return None
     try:
         filename, headers = urlretrieve(uri)
     except Exception as err:
@@ -97,25 +104,25 @@ def freshmeat(id):
         return None
     with open(filename, "r") as f:
         for event, elem in tryparse(f, id):
-            if elem.tag == "latest_release_version":
+            if elem.tag == "version":
                 try:
-                    version_new = VersionSpec(elem.text)
-                    break
+                    versions.append(VersionSpec(elem.text))
                 except:
                     Log.instance.message("freshmeat.bad_version",
                             LogLevel.WARNING, LogContext.NO_CONTEXT,
                             "freshmeat has bad version for id %s: %s" % (id,
                                 elem.text))
                     return None
-    if version_new is None:
-        Log.instance.message("freshmeat.no_version",
+    if not versions:
+        Log.instance.message("freshmeat.no_versions",
                 LogLevel.WARNING, LogContext.NO_CONTEXT,
-                "freshmeat has no latest version information for id %s" % id)
+                "freshmeat has no version information for id " + id)
         return None
     else:
-        return version_new
+        versions.sort(reverse=True)
+        return versions[0]
 
-def pypi(id):
+def pypi(id, auth_data=None):
     version_new = None
     uri = "http://pypi.python.org/pypi?:action=doap&name=%s" % id
     try:
@@ -145,7 +152,7 @@ def pypi(id):
     else:
         return version_new
 
-def cpan(id):
+def cpan(id, auth_data=None):
     version_new = None
     uri = "http://search.cpan.org/search?mode=dist&format=xml&query=%s" % id
     try:
@@ -179,7 +186,7 @@ def cpan(id):
     else:
         return version_new
 
-def vim(id):
+def vim(id, auth_data=None):
     version_new = None
     uri = "http://www.vim.org/scripts/script.php?script_id=%s" % id
     try:
@@ -209,7 +216,7 @@ def vim(id):
     else:
         return version_new
 
-def rubyforge(id):
+def rubyforge(id, auth_data=None):
     version_new = None
     gem = Popen(["gem", "search", id, "--remote"], stdout = PIPE, stderr = PIPE)
     out, err = gem.communicate()
