@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim: set sw=4 ts=4 sts=4 et tw=80 fdm=marker fmr={{{,}}}:
 #
-# Copyright (c) 2008 Ali Polatel <alip@exherbo.org>
+# Copyright (c) 2008, 2010 Ali Polatel <alip@exherbo.org>
 #
 # This file is part of the paludis-utils. paludis-utils is free software; you
 # can redistribute it and/or modify it under the terms of the GNU General
@@ -28,7 +28,7 @@ import re
 
 from paludis import (Filter, Generator, Log, LogLevel, LogContext,
         MatchPackageOptions, Selection, VersionSpec, UserPackageDepSpecOption,
-        QualifiedPackageNameError, parse_user_package_dep_spec)
+        parse_user_package_dep_spec)
 
 from putils.util import rootjoin
 
