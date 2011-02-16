@@ -49,7 +49,7 @@ def get_contents(package, env, source_repos = [],
     #}}}
 
     #{{{Get PackageDepSpec
-    filter_installed = Filter.InstalledAtRoot(env.root)
+    filter_installed = Filter.InstalledAtRoot(env.system_root_key)
     allow_wildcards = UserPackageDepSpecOption.ALLOW_WILDCARDS
     package_dep_spec = parse_user_package_dep_spec(package, env,
             [allow_wildcards], filter_installed)
