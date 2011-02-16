@@ -20,4 +20,4 @@
 """Applets for paludis-utils
 """
 
-__all__ = [ "pfile", "plist", "psize", "pquery" ]
+__all__ = [ "pquery" ]
