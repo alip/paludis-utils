@@ -74,17 +74,17 @@ def get_contents(package, env, source_repos = [],
                     repo_origin = package_id.from_repositories_key()
 
                     if not any(repo in source_repos for repo in
-                            repo_origin.value()):
+                            repo_origin.parse_value()):
                         continue
             #}}}
 
             requested_contents = list()
-            for content in package_id.contents_key().value():
+            for content in package_id.contents_key().parse_value():
                 if not any([isinstance(content, i) for i in
                     requested_instances]):
                     continue
 
-                content_path = rootjoin(content.location_key().value(), env.root)
+                content_path = rootjoin(content.location_key().parse_value(), env.root)
 
                 if fnpattern is not None:
                     if ignore_case:
@@ -127,12 +127,12 @@ def search_contents(path, env, matcher="exact", ignore_case=False, #{{{
                     LogContext.NO_CONTEXT,
                     "'%s' does not provide a contents key." % package_id.name)
         else:
-            for content in package_id.contents_key().value():
+            for content in package_id.contents_key().parse_value():
                 if not True in [isinstance(content, i) for i in
                         requested_instances]:
                     continue
 
-                content_path = rootjoin(content.location_key().value(), env.root)
+                content_path = rootjoin(content.location_key().parse_value(), env.root)
 
                 if (matcher == "exact" and
                         (path == content_path or

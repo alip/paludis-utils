@@ -133,7 +133,7 @@ def colourify_content(content, root="", target=False):
     If target is True and content is a symbolic link,
     colourify content.target instead of content.name."""
 
-    content_name = rootjoin(content.location_key().value(), root)
+    content_name = rootjoin(content.location_key().parse_value(), root)
 
     codes, special_codes = parse_ls_colours()
     if not codes and not special_codes:
@@ -146,12 +146,12 @@ def colourify_content(content, root="", target=False):
     elif isinstance(content, ContentsSymEntry):
         if not target:
             return "\033[" + special_codes.get("ln", "00") + "m" + content_name + "\033[m"
-        elif os.path.isabs(content.target_key().value()):
-            content_target = rootjoin(content.target_key().value(), root)
+        elif os.path.isabs(content.target_key().parse_value()):
+            content_target = rootjoin(content.target_key().parse_value(), root)
             return colourify_file(content_target, codes, special_codes)
         else:
             dname = os.path.dirname(content_name)
-            abstarget = rootjoin(content.target_key().value(), dname)
+            abstarget = rootjoin(content.target_key().parse_value(), dname)
             return colourify_file(abstarget, codes, special_codes).replace(
                         dname + os.path.sep, '')
     else:
@@ -159,13 +159,13 @@ def colourify_content(content, root="", target=False):
 
 def no_colourify_content(content, root="", target=False):
     """Dummy replacement for colourify_content() with no colouring."""
-    content_name = rootjoin(content.location_key().value(), root)
+    content_name = rootjoin(content.location_key().parse_value(), root)
     if target:
-        if os.path.isabs(content.target_key().value()):
-            return rootjoin(content.target_key().value(), root)
+        if os.path.isabs(content.target_key().parse_value()):
+            return rootjoin(content.target_key().parse_value(), root)
         else:
             dname = os.path.dirname(content_name)
-            return rootjoin(content.target_key().value(), dname).replace(
+            return rootjoin(content.target_key().parse_value(), dname).replace(
                     dname + os.path.sep, '')
     else:
         return content_name
