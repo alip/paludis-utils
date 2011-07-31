@@ -50,7 +50,7 @@ def get_ids(env, package, include_masked):
     for pid in pids:
         mkey = pid.find_metadata("REMOTE_IDS")
         if mkey is not None:
-            values = mkey.value()
+            values = mkey.parse_value()
             yield pid.name, pid.version, values
         else:
             Log.instance.message("e.no_remote_ids", LogLevel.WARNING,
